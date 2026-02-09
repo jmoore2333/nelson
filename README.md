@@ -11,7 +11,11 @@ A Claude Code skill for coordinating agent work based on the Royal Navy. It prov
 ## What it does
 
 
-https://github.com/user-attachments/assets/91df06fc-0b61-4925-a934-4c7fdcbf0457
+
+
+https://github.com/user-attachments/assets/2468679d-39f5-4efb-9d93-43d43eee8907
+
+
 
 
 Nelson gives Claude a six-step operational framework for tackling complex missions:
