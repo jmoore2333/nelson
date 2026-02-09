@@ -1,10 +1,16 @@
-# Project Victory
+# Nelson
+
+<p align="center">
+  <img src="HMP_RNM_1973_76-001.jpg" alt="HMS Victory anchored off the Isle of Wight" width="700">
+  <br>
+  <em>HMS Victory anchored off the Isle of Wight — John Wilson Carmichael (1799–1868), National Museum of the Royal Navy, Portsmouth</em>
+</p>
 
 A Claude Code skill for coordinating agent work using a Royal Navy themed workflow. It provides structured sailing orders, battle plans, action stations, and a captain's log to manage complex tasks — from single-session work through to parallel subagent squadrons.
 
 ## What it does
 
-Project Victory gives Claude a six-step operational framework for tackling complex missions:
+Nelson gives Claude a six-step operational framework for tackling complex missions:
 
 1. **Sailing Orders** — Define the outcome, success metric, constraints, and stop criteria
 2. **Form the Squadron** — Choose an execution mode (single-session, subagents, or agent team) and size the team
@@ -26,15 +32,15 @@ Copy the skill into your project's `.claude/skills/` directory, or into your per
 ```bash
 # From your project root
 mkdir -p .claude/skills
-cp -r project-victory .claude/skills/project-victory
+cp -r nelson .claude/skills/nelson
 ```
 
-Then commit `.claude/skills/project-victory/` to version control so your team can use it.
+Then commit `.claude/skills/nelson/` to version control so your team can use it.
 
 ### User-level (personal, all projects)
 
 ```bash
-cp -r project-victory ~/.claude/skills/project-victory
+cp -r nelson ~/.claude/skills/nelson
 ```
 
 ### Verify installation
@@ -45,10 +51,10 @@ Open Claude Code and ask:
 What skills are available?
 ```
 
-You should see `project-victory` listed. You can also invoke it directly:
+You should see `nelson` listed. You can also invoke it directly:
 
 ```
-/project-victory
+/nelson
 ```
 
 ## Usage
@@ -59,7 +65,7 @@ Claude reads the skill description and loads it when your request matches — fo
 
 ```
 I need to refactor the authentication system. The work spans the API layer,
-the frontend, and the test suite. Use project-victory to coordinate this.
+the frontend, and the test suite. Use nelson to coordinate this.
 ```
 
 ### Invoke it directly
@@ -67,7 +73,7 @@ the frontend, and the test suite. Use project-victory to coordinate this.
 Use the slash command with your mission brief:
 
 ```
-/project-victory Migrate the payment processing module from Stripe v2 to v3
+/nelson Migrate the payment processing module from Stripe v2 to v3
 ```
 
 ### Provide structured sailing orders
@@ -75,7 +81,7 @@ Use the slash command with your mission brief:
 For maximum control, provide your own sailing orders:
 
 ```
-/project-victory
+/nelson
 
 Sailing orders:
 - Outcome: All API endpoints return consistent error responses
@@ -145,7 +151,7 @@ The skill includes structured templates for consistent output across missions:
 ## Skill file structure
 
 ```
-.claude/skills/project-victory/
+.claude/skills/nelson/
 ├── SKILL.md                                  # Main skill instructions (entrypoint)
 ├── agents/
 │   └── openai.yaml                           # OpenAI agent interface definition
