@@ -6,7 +6,7 @@
   <em>Captain Horatio Nelson — John Francis Rigaud, 1781. Image: Wikimedia Commons</em>
 </p>
 
-A Claude Code skill for coordinating agent work using a Royal Navy themed workflow. It provides structured sailing orders, battle plans, action stations, and a captain's log to manage complex tasks — from single-session work through to parallel subagent squadrons.
+A Claude Code skill for coordinating agent work based on the Royal Navy. It provides structured sailing orders, battle plans, action stations, and a captain's log to manage complex tasks — from single-session work through to parallel subagent squadrons.
 
 ## What it does
 
@@ -199,6 +199,10 @@ Edit `references/squadron-composition.md` to adjust the decision matrix or defau
 
 Without this setting, Claude will use `single-session` or `subagents` mode instead.
 
+## Disclaimer
+
+This project is not associated with, endorsed by, or affiliated with the British Royal Navy or the UK Ministry of Defence. All Royal Navy terminology and references are used purely as a creative framework for organising software development tasks.
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE) for details.

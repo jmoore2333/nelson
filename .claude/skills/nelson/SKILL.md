@@ -1,6 +1,6 @@
 ---
 name: nelson
-description: Command a Royal Navy themed agent squadron from sailing orders through execution and stand-down. Use when work can be parallelized, requires tight coordination, or needs explicit action-station controls, quality gates, and a final captain's log.
+description: Command a Royal Navy agent squadron from sailing orders through execution and stand-down. Use when work can be parallelized, requires tight coordination, or needs explicit action-station controls, quality gates, and a final captain's log.
 ---
 
 # Nelson
