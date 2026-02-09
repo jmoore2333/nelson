@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battleships</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0d1b2a;
+      color: #e0e1dd;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      padding: 1.2rem 1rem 0.6rem;
+      background: linear-gradient(180deg, #1b2838 0%, #0d1b2a 100%);
+      border-bottom: 2px solid #2c3e50;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #e0e1dd;
+      text-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
+    }
+
+    #status-message {
+      margin: 0.8rem auto;
+      padding: 0.6rem 1.4rem;
+      font-size: 1.05rem;
+      text-align: center;
+      color: #a8dadc;
+      background: rgba(30, 58, 95, 0.5);
+      border: 1px solid #2c3e50;
+      border-radius: 4px;
+      max-width: 600px;
+      min-height: 2.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.3s, background 0.3s;
+    }
+
+    /* -- Placement Panel -- */
+    #placement-panel {
+      margin: 0.6rem auto;
+      padding: 0.8rem 1.2rem;
+      background: #1b2838;
+      border: 1px solid #2c3e50;
+      border-radius: 6px;
+      max-width: 720px;
+      width: 90%;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.8rem;
+      transition: opacity 0.4s, max-height 0.4s;
+    }
+
+    #placement-panel.hidden {
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
+
+    #placement-panel h3 {
+      width: 100%;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #778da9;
+      margin-bottom: 0.2rem;
+    }
+
+    .ship-option {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.7rem;
+      background: #1e3a5f;
+      border: 1px solid #34495e;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #e0e1dd;
+      cursor: default;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .ship-option.active {
+      background: #2ecc71;
+      color: #0d1b2a;
+      border-color: #27ae60;
+      font-weight: 600;
+    }
+
+    .ship-option.placed {
+      opacity: 0.4;
+      text-decoration: line-through;
+    }
+
+    .ship-option .ship-size {
+      font-weight: 700;
+      margin-left: 0.2rem;
+    }
+
+    #rotate-btn {
+      padding: 0.4rem 0.9rem;
+      background: #2c3e50;
+      color: #e0e1dd;
+      border: 1px solid #4a6fa5;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    #rotate-btn:hover {
+      background: #4a6fa5;
+    }
+
+    #rotate-btn:active {
+      transform: scale(0.95);
+    }
+
+    .placement-instructions {
+      width: 100%;
+      font-size: 0.78rem;
+      color: #778da9;
+      font-style: italic;
+    }
+
+    /* -- Boards Area -- */
+    .boards-container {
+      display: flex;
+      gap: 2.5rem;
+      padding: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .board-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .board-section h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #778da9;
+      margin-bottom: 0.5rem;
+    }
+
+    .board-wrapper {
+      display: inline-grid;
+      gap: 0;
+    }
+
+    /* Grid: 11 cols (corner + A-J), 11 rows (corner + 1-10) */
+    .grid {
+      display: grid;
+      grid-template-columns: 28px repeat(10, 40px);
+      grid-template-rows: 28px repeat(10, 40px);
+    }
+
+    .label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #778da9;
+      user-select: none;
+    }
+
+    .label.corner {
+      /* top-left empty corner */
+    }
+
+    /* -- Cells -- */
+    .cell {
+      width: 40px;
+      height: 40px;
+      background: #1e3a5f;
+      border: 1px solid #2c3e50;
+      position: relative;
+      cursor: default;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    /* Enemy grid hover */
+    #enemy-grid .cell:hover {
+      background: #24506e;
+      box-shadow: inset 0 0 8px rgba(46, 204, 113, 0.35);
+      cursor: crosshair;
+    }
+
+    #enemy-grid .cell.hit:hover,
+    #enemy-grid .cell.miss:hover,
+    #enemy-grid .cell.sunk:hover {
+      cursor: default;
+      box-shadow: none;
+    }
+
+    /* Ship on player board */
+    .cell.ship {
+      background: #4a6fa5;
+    }
+
+    /* Hit */
+    .cell.hit {
+      background: #e74c3c;
+      animation: hitFlash 0.4s ease-out;
+    }
+
+    .cell.hit::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, #f39c12 30%, #e74c3c 70%, transparent 100%);
+      box-shadow: 0 0 6px 2px rgba(243, 156, 18, 0.5);
+    }
+
+    @keyframes hitFlash {
+      0% { background: #fff; }
+      100% { background: #e74c3c; }
+    }
+
+    /* Miss */
+    .cell.miss {
+      background: #1e3a5f;
+    }
+
+    .cell.miss::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #ecf0f1;
+      opacity: 0.7;
+      box-shadow: 0 0 4px rgba(236, 240, 241, 0.4);
+    }
+
+    /* Sunk */
+    .cell.sunk {
+      background: #c0392b;
+    }
+
+    .cell.sunk::after {
+      content: '\2715';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Placement preview */
+    .cell.preview-valid {
+      background: rgba(46, 204, 113, 0.4);
+      box-shadow: inset 0 0 6px rgba(46, 204, 113, 0.3);
+    }
+
+    .cell.preview-invalid {
+      background: rgba(231, 76, 60, 0.4);
+      box-shadow: inset 0 0 6px rgba(231, 76, 60, 0.3);
+    }
+
+    /* -- Game Over Overlay -- */
+    #game-over-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 27, 42, 0.88);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    #game-over-overlay.visible {
+      display: flex;
+    }
+
+    .game-over-box {
+      text-align: center;
+      padding: 2.5rem 3rem;
+      background: #1b2838;
+      border: 2px solid #4a6fa5;
+      border-radius: 10px;
+      box-shadow: 0 0 40px rgba(74, 111, 165, 0.3);
+    }
+
+    #game-over-message {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    #play-again-btn {
+      padding: 0.65rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0d1b2a;
+      background: #2ecc71;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    #play-again-btn:hover {
+      background: #27ae60;
+    }
+
+    #play-again-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* -- Responsive -- */
+    @media (max-width: 960px) {
+      .boards-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Battleships</h1>
+  </header>
+
+  <div id="status-message">Place your ships to begin</div>
+
+  <!-- Ship Placement Panel -->
+  <div id="placement-panel">
+    <h3>Deploy Your Fleet</h3>
+    <div class="ship-option active" data-ship="carrier" data-size="5">
+      Carrier <span class="ship-size">(5)</span>
+    </div>
+    <div class="ship-option" data-ship="battleship" data-size="4">
+      Battleship <span class="ship-size">(4)</span>
+    </div>
+    <div class="ship-option" data-ship="cruiser" data-size="3">
+      Cruiser <span class="ship-size">(3)</span>
+    </div>
+    <div class="ship-option" data-ship="submarine" data-size="3">
+      Submarine <span class="ship-size">(3)</span>
+    </div>
+    <div class="ship-option" data-ship="destroyer" data-size="2">
+      Destroyer <span class="ship-size">(2)</span>
+    </div>
+    <button id="rotate-btn" title="Press R to rotate">Rotate (R)</button>
+    <p class="placement-instructions">Click on your grid to place the selected ship. Press <strong>R</strong> to rotate.</p>
+  </div>
+
+  <!-- Game Boards -->
+  <div class="boards-container">
+
+    <!-- Player Board -->
+    <div class="board-section">
+      <h2>Your Fleet</h2>
+      <div class="grid" id="player-grid">
+        <!-- Corner -->
+        <div class="label corner"></div>
+        <!-- Column headers A-J -->
+        <div class="label col-header">A</div>
+        <div class="label col-header">B</div>
+        <div class="label col-header">C</div>
+        <div class="label col-header">D</div>
+        <div class="label col-header">E</div>
+        <div class="label col-header">F</div>
+        <div class="label col-header">G</div>
+        <div class="label col-header">H</div>
+        <div class="label col-header">I</div>
+        <div class="label col-header">J</div>
+        <!-- Rows 1-10, each with row label + 10 cells -->
+        <div class="label row-header">1</div>
+        <div class="cell" data-row="0" data-col="0"></div>
+        <div class="cell" data-row="0" data-col="1"></div>
+        <div class="cell" data-row="0" data-col="2"></div>
+        <div class="cell" data-row="0" data-col="3"></div>
+        <div class="cell" data-row="0" data-col="4"></div>
+        <div class="cell" data-row="0" data-col="5"></div>
+        <div class="cell" data-row="0" data-col="6"></div>
+        <div class="cell" data-row="0" data-col="7"></div>
+        <div class="cell" data-row="0" data-col="8"></div>
+        <div class="cell" data-row="0" data-col="9"></div>
+        <div class="label row-header">2</div>
+        <div class="cell" data-row="1" data-col="0"></div>
+        <div class="cell" data-row="1" data-col="1"></div>
+        <div class="cell" data-row="1" data-col="2"></div>
+        <div class="cell" data-row="1" data-col="3"></div>
+        <div class="cell" data-row="1" data-col="4"></div>
+        <div class="cell" data-row="1" data-col="5"></div>
+        <div class="cell" data-row="1" data-col="6"></div>
+        <div class="cell" data-row="1" data-col="7"></div>
+        <div class="cell" data-row="1" data-col="8"></div>
+        <div class="cell" data-row="1" data-col="9"></div>
+        <div class="label row-header">3</div>
+        <div class="cell" data-row="2" data-col="0"></div>
+        <div class="cell" data-row="2" data-col="1"></div>
+        <div class="cell" data-row="2" data-col="2"></div>
+        <div class="cell" data-row="2" data-col="3"></div>
+        <div class="cell" data-row="2" data-col="4"></div>
+        <div class="cell" data-row="2" data-col="5"></div>
+        <div class="cell" data-row="2" data-col="6"></div>
+        <div class="cell" data-row="2" data-col="7"></div>
+        <div class="cell" data-row="2" data-col="8"></div>
+        <div class="cell" data-row="2" data-col="9"></div>
+        <div class="label row-header">4</div>
+        <div class="cell" data-row="3" data-col="0"></div>
+        <div class="cell" data-row="3" data-col="1"></div>
+        <div class="cell" data-row="3" data-col="2"></div>
+        <div class="cell" data-row="3" data-col="3"></div>
+        <div class="cell" data-row="3" data-col="4"></div>
+        <div class="cell" data-row="3" data-col="5"></div>
+        <div class="cell" data-row="3" data-col="6"></div>
+        <div class="cell" data-row="3" data-col="7"></div>
+        <div class="cell" data-row="3" data-col="8"></div>
+        <div class="cell" data-row="3" data-col="9"></div>
+        <div class="label row-header">5</div>
+        <div class="cell" data-row="4" data-col="0"></div>
+        <div class="cell" data-row="4" data-col="1"></div>
+        <div class="cell" data-row="4" data-col="2"></div>
+        <div class="cell" data-row="4" data-col="3"></div>
+        <div class="cell" data-row="4" data-col="4"></div>
+        <div class="cell" data-row="4" data-col="5"></div>
+        <div class="cell" data-row="4" data-col="6"></div>
+        <div class="cell" data-row="4" data-col="7"></div>
+        <div class="cell" data-row="4" data-col="8"></div>
+        <div class="cell" data-row="4" data-col="9"></div>
+        <div class="label row-header">6</div>
+        <div class="cell" data-row="5" data-col="0"></div>
+        <div class="cell" data-row="5" data-col="1"></div>
+        <div class="cell" data-row="5" data-col="2"></div>
+        <div class="cell" data-row="5" data-col="3"></div>
+        <div class="cell" data-row="5" data-col="4"></div>
+        <div class="cell" data-row="5" data-col="5"></div>
+        <div class="cell" data-row="5" data-col="6"></div>
+        <div class="cell" data-row="5" data-col="7"></div>
+        <div class="cell" data-row="5" data-col="8"></div>
+        <div class="cell" data-row="5" data-col="9"></div>
+        <div class="label row-header">7</div>
+        <div class="cell" data-row="6" data-col="0"></div>
+        <div class="cell" data-row="6" data-col="1"></div>
+        <div class="cell" data-row="6" data-col="2"></div>
+        <div class="cell" data-row="6" data-col="3"></div>
+        <div class="cell" data-row="6" data-col="4"></div>
+        <div class="cell" data-row="6" data-col="5"></div>
+        <div class="cell" data-row="6" data-col="6"></div>
+        <div class="cell" data-row="6" data-col="7"></div>
+        <div class="cell" data-row="6" data-col="8"></div>
+        <div class="cell" data-row="6" data-col="9"></div>
+        <div class="label row-header">8</div>
+        <div class="cell" data-row="7" data-col="0"></div>
+        <div class="cell" data-row="7" data-col="1"></div>
+        <div class="cell" data-row="7" data-col="2"></div>
+        <div class="cell" data-row="7" data-col="3"></div>
+        <div class="cell" data-row="7" data-col="4"></div>
+        <div class="cell" data-row="7" data-col="5"></div>
+        <div class="cell" data-row="7" data-col="6"></div>
+        <div class="cell" data-row="7" data-col="7"></div>
+        <div class="cell" data-row="7" data-col="8"></div>
+        <div class="cell" data-row="7" data-col="9"></div>
+        <div class="label row-header">9</div>
+        <div class="cell" data-row="8" data-col="0"></div>
+        <div class="cell" data-row="8" data-col="1"></div>
+        <div class="cell" data-row="8" data-col="2"></div>
+        <div class="cell" data-row="8" data-col="3"></div>
+        <div class="cell" data-row="8" data-col="4"></div>
+        <div class="cell" data-row="8" data-col="5"></div>
+        <div class="cell" data-row="8" data-col="6"></div>
+        <div class="cell" data-row="8" data-col="7"></div>
+        <div class="cell" data-row="8" data-col="8"></div>
+        <div class="cell" data-row="8" data-col="9"></div>
+        <div class="label row-header">10</div>
+        <div class="cell" data-row="9" data-col="0"></div>
+        <div class="cell" data-row="9" data-col="1"></div>
+        <div class="cell" data-row="9" data-col="2"></div>
+        <div class="cell" data-row="9" data-col="3"></div>
+        <div class="cell" data-row="9" data-col="4"></div>
+        <div class="cell" data-row="9" data-col="5"></div>
+        <div class="cell" data-row="9" data-col="6"></div>
+        <div class="cell" data-row="9" data-col="7"></div>
+        <div class="cell" data-row="9" data-col="8"></div>
+        <div class="cell" data-row="9" data-col="9"></div>
+      </div>
+    </div>
+
+    <!-- Enemy Board -->
+    <div class="board-section">
+      <h2>Enemy Waters</h2>
+      <div class="grid" id="enemy-grid">
+        <!-- Corner -->
+        <div class="label corner"></div>
+        <!-- Column headers A-J -->
+        <div class="label col-header">A</div>
+        <div class="label col-header">B</div>
+        <div class="label col-header">C</div>
+        <div class="label col-header">D</div>
+        <div class="label col-header">E</div>
+        <div class="label col-header">F</div>
+        <div class="label col-header">G</div>
+        <div class="label col-header">H</div>
+        <div class="label col-header">I</div>
+        <div class="label col-header">J</div>
+        <!-- Rows 1-10, each with row label + 10 cells -->
+        <div class="label row-header">1</div>
+        <div class="cell" data-row="0" data-col="0"></div>
+        <div class="cell" data-row="0" data-col="1"></div>
+        <div class="cell" data-row="0" data-col="2"></div>
+        <div class="cell" data-row="0" data-col="3"></div>
+        <div class="cell" data-row="0" data-col="4"></div>
+        <div class="cell" data-row="0" data-col="5"></div>
+        <div class="cell" data-row="0" data-col="6"></div>
+        <div class="cell" data-row="0" data-col="7"></div>
+        <div class="cell" data-row="0" data-col="8"></div>
+        <div class="cell" data-row="0" data-col="9"></div>
+        <div class="label row-header">2</div>
+        <div class="cell" data-row="1" data-col="0"></div>
+        <div class="cell" data-row="1" data-col="1"></div>
+        <div class="cell" data-row="1" data-col="2"></div>
+        <div class="cell" data-row="1" data-col="3"></div>
+        <div class="cell" data-row="1" data-col="4"></div>
+        <div class="cell" data-row="1" data-col="5"></div>
+        <div class="cell" data-row="1" data-col="6"></div>
+        <div class="cell" data-row="1" data-col="7"></div>
+        <div class="cell" data-row="1" data-col="8"></div>
+        <div class="cell" data-row="1" data-col="9"></div>
+        <div class="label row-header">3</div>
+        <div class="cell" data-row="2" data-col="0"></div>
+        <div class="cell" data-row="2" data-col="1"></div>
+        <div class="cell" data-row="2" data-col="2"></div>
+        <div class="cell" data-row="2" data-col="3"></div>
+        <div class="cell" data-row="2" data-col="4"></div>
+        <div class="cell" data-row="2" data-col="5"></div>
+        <div class="cell" data-row="2" data-col="6"></div>
+        <div class="cell" data-row="2" data-col="7"></div>
+        <div class="cell" data-row="2" data-col="8"></div>
+        <div class="cell" data-row="2" data-col="9"></div>
+        <div class="label row-header">4</div>
+        <div class="cell" data-row="3" data-col="0"></div>
+        <div class="cell" data-row="3" data-col="1"></div>
+        <div class="cell" data-row="3" data-col="2"></div>
+        <div class="cell" data-row="3" data-col="3"></div>
+        <div class="cell" data-row="3" data-col="4"></div>
+        <div class="cell" data-row="3" data-col="5"></div>
+        <div class="cell" data-row="3" data-col="6"></div>
+        <div class="cell" data-row="3" data-col="7"></div>
+        <div class="cell" data-row="3" data-col="8"></div>
+        <div class="cell" data-row="3" data-col="9"></div>
+        <div class="label row-header">5</div>
+        <div class="cell" data-row="4" data-col="0"></div>
+        <div class="cell" data-row="4" data-col="1"></div>
+        <div class="cell" data-row="4" data-col="2"></div>
+        <div class="cell" data-row="4" data-col="3"></div>
+        <div class="cell" data-row="4" data-col="4"></div>
+        <div class="cell" data-row="4" data-col="5"></div>
+        <div class="cell" data-row="4" data-col="6"></div>
+        <div class="cell" data-row="4" data-col="7"></div>
+        <div class="cell" data-row="4" data-col="8"></div>
+        <div class="cell" data-row="4" data-col="9"></div>
+        <div class="label row-header">6</div>
+        <div class="cell" data-row="5" data-col="0"></div>
+        <div class="cell" data-row="5" data-col="1"></div>
+        <div class="cell" data-row="5" data-col="2"></div>
+        <div class="cell" data-row="5" data-col="3"></div>
+        <div class="cell" data-row="5" data-col="4"></div>
+        <div class="cell" data-row="5" data-col="5"></div>
+        <div class="cell" data-row="5" data-col="6"></div>
+        <div class="cell" data-row="5" data-col="7"></div>
+        <div class="cell" data-row="5" data-col="8"></div>
+        <div class="cell" data-row="5" data-col="9"></div>
+        <div class="label row-header">7</div>
+        <div class="cell" data-row="6" data-col="0"></div>
+        <div class="cell" data-row="6" data-col="1"></div>
+        <div class="cell" data-row="6" data-col="2"></div>
+        <div class="cell" data-row="6" data-col="3"></div>
+        <div class="cell" data-row="6" data-col="4"></div>
+        <div class="cell" data-row="6" data-col="5"></div>
+        <div class="cell" data-row="6" data-col="6"></div>
+        <div class="cell" data-row="6" data-col="7"></div>
+        <div class="cell" data-row="6" data-col="8"></div>
+        <div class="cell" data-row="6" data-col="9"></div>
+        <div class="label row-header">8</div>
+        <div class="cell" data-row="7" data-col="0"></div>
+        <div class="cell" data-row="7" data-col="1"></div>
+        <div class="cell" data-row="7" data-col="2"></div>
+        <div class="cell" data-row="7" data-col="3"></div>
+        <div class="cell" data-row="7" data-col="4"></div>
+        <div class="cell" data-row="7" data-col="5"></div>
+        <div class="cell" data-row="7" data-col="6"></div>
+        <div class="cell" data-row="7" data-col="7"></div>
+        <div class="cell" data-row="7" data-col="8"></div>
+        <div class="cell" data-row="7" data-col="9"></div>
+        <div class="label row-header">9</div>
+        <div class="cell" data-row="8" data-col="0"></div>
+        <div class="cell" data-row="8" data-col="1"></div>
+        <div class="cell" data-row="8" data-col="2"></div>
+        <div class="cell" data-row="8" data-col="3"></div>
+        <div class="cell" data-row="8" data-col="4"></div>
+        <div class="cell" data-row="8" data-col="5"></div>
+        <div class="cell" data-row="8" data-col="6"></div>
+        <div class="cell" data-row="8" data-col="7"></div>
+        <div class="cell" data-row="8" data-col="8"></div>
+        <div class="cell" data-row="8" data-col="9"></div>
+        <div class="label row-header">10</div>
+        <div class="cell" data-row="9" data-col="0"></div>
+        <div class="cell" data-row="9" data-col="1"></div>
+        <div class="cell" data-row="9" data-col="2"></div>
+        <div class="cell" data-row="9" data-col="3"></div>
+        <div class="cell" data-row="9" data-col="4"></div>
+        <div class="cell" data-row="9" data-col="5"></div>
+        <div class="cell" data-row="9" data-col="6"></div>
+        <div class="cell" data-row="9" data-col="7"></div>
+        <div class="cell" data-row="9" data-col="8"></div>
+        <div class="cell" data-row="9" data-col="9"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div id="game-over-overlay">
+    <div class="game-over-box">
+      <div id="game-over-message">Victory!</div>
+      <button id="play-again-btn">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+// ============================================================
+// GAME ENGINE (from engine.js)
+// ============================================================
+
+var SHIPS = {
+  Carrier:    { name: 'Carrier',    size: 5 },
+  Battleship: { name: 'Battleship', size: 4 },
+  Cruiser:    { name: 'Cruiser',    size: 3 },
+  Submarine:  { name: 'Submarine',  size: 3 },
+  Destroyer:  { name: 'Destroyer',  size: 2 }
+};
+
+var COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+var BOARD_SIZE = 10;
+
+function createBoard() {
+  var board = [];
+  for (var r = 0; r < BOARD_SIZE; r++) {
+    var row = [];
+    for (var c = 0; c < BOARD_SIZE; c++) {
+      row.push(null);
+    }
+    board.push(row);
+  }
+  return board;
+}
+
+function canPlaceShip(board, size, row, col, horizontal) {
+  for (var i = 0; i < size; i++) {
+    var r = horizontal ? row : row + i;
+    var c = horizontal ? col + i : col;
+    if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) {
+      return false;
+    }
+    if (board[r][c] !== null) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function placeShip(board, ships, shipName, size, row, col, horizontal) {
+  if (!canPlaceShip(board, size, row, col, horizontal)) {
+    return null;
+  }
+
+  var positions = [];
+  for (var i = 0; i < size; i++) {
+    var r = horizontal ? row : row + i;
+    var c = horizontal ? col + i : col;
+    board[r][c] = 'ship';
+    positions.push({ row: r, col: c });
+  }
+
+  ships.push({
+    name: shipName,
+    size: size,
+    positions: positions,
+    hits: 0,
+    sunk: false
+  });
+
+  return { board: board, ships: ships };
+}
+
+function getShipAt(ships, row, col) {
+  for (var i = 0; i < ships.length; i++) {
+    var positions = ships[i].positions;
+    for (var j = 0; j < positions.length; j++) {
+      if (positions[j].row === row && positions[j].col === col) {
+        return ships[i];
+      }
+    }
+  }
+  return null;
+}
+
+function processShot(board, ships, row, col) {
+  if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
+    return { result: 'miss' };
+  }
+
+  var cell = board[row][col];
+
+  if (cell === 'hit' || cell === 'miss') {
+    return { result: cell, alreadyFired: true };
+  }
+
+  if (cell === 'ship') {
+    board[row][col] = 'hit';
+    var ship = getShipAt(ships, row, col);
+    ship.hits++;
+    if (ship.hits >= ship.size) {
+      ship.sunk = true;
+      return { result: 'sunk', shipName: ship.name };
+    }
+    return { result: 'hit', shipName: ship.name };
+  }
+
+  board[row][col] = 'miss';
+  return { result: 'miss' };
+}
+
+function isGameOver(ships) {
+  for (var i = 0; i < ships.length; i++) {
+    if (!ships[i].sunk) {
+      return false;
+    }
+  }
+  return ships.length > 0;
+}
+
+function colToIndex(letter) {
+  return letter.toUpperCase().charCodeAt(0) - 65;
+}
+
+function indexToCol(index) {
+  return String.fromCharCode(65 + index);
+}
+
+function parseCoord(coord) {
+  var letter = coord.charAt(0).toUpperCase();
+  var num = parseInt(coord.substring(1), 10);
+  return {
+    row: num - 1,
+    col: colToIndex(letter)
+  };
+}
+
+function formatCoord(row, col) {
+  return indexToCol(col) + (row + 1);
+}
+
+function randomPlacement() {
+  var board = createBoard();
+  var ships = [];
+  var shipDefs = [
+    { name: 'Carrier',    size: 5 },
+    { name: 'Battleship', size: 4 },
+    { name: 'Cruiser',    size: 3 },
+    { name: 'Submarine',  size: 3 },
+    { name: 'Destroyer',  size: 2 }
+  ];
+
+  for (var s = 0; s < shipDefs.length; s++) {
+    var placed = false;
+    while (!placed) {
+      var horizontal = Math.random() < 0.5;
+      var row = Math.floor(Math.random() * BOARD_SIZE);
+      var col = Math.floor(Math.random() * BOARD_SIZE);
+      var result = placeShip(board, ships, shipDefs[s].name, shipDefs[s].size, row, col, horizontal);
+      if (result !== null) {
+        placed = true;
+      }
+    }
+  }
+
+  return { board: board, ships: ships };
+}
+
+// ============================================================
+// AI OPPONENT (from ai.js)
+// ============================================================
+
+var AI_SHIPS = [
+  { name: 'Carrier',    size: 5 },
+  { name: 'Battleship', size: 4 },
+  { name: 'Cruiser',    size: 3 },
+  { name: 'Submarine',  size: 3 },
+  { name: 'Destroyer',  size: 2 }
+];
+
+function createEmptyBoard() {
+  var board = [];
+  for (var r = 0; r < 10; r++) {
+    var row = [];
+    for (var c = 0; c < 10; c++) {
+      row.push(null);
+    }
+    board.push(row);
+  }
+  return board;
+}
+
+function tryPlaceShip(board, size, row, col, orientation) {
+  var cells = [];
+  for (var i = 0; i < size; i++) {
+    var r = orientation === 'vertical'   ? row + i : row;
+    var c = orientation === 'horizontal' ? col + i : col;
+    if (r < 0 || r >= 10 || c < 0 || c >= 10) return null;
+    if (board[r][c] !== null) return null;
+    cells.push({ row: r, col: c });
+  }
+  return cells;
+}
+
+function aiPlaceShips(board, ships) {
+  board = board || createEmptyBoard();
+  var shipDefs = ships || AI_SHIPS;
+
+  var placed = [];
+
+  for (var s = 0; s < shipDefs.length; s++) {
+    var def  = shipDefs[s];
+    var size = def.size;
+    var cells = null;
+
+    var attempts = 0;
+    while (cells === null) {
+      attempts++;
+      if (attempts > 1000) {
+        board = createEmptyBoard();
+        placed = [];
+        s = -1;
+        break;
+      }
+      var orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+      var maxRow = orientation === 'vertical'   ? 10 - size : 9;
+      var maxCol = orientation === 'horizontal' ? 10 - size : 9;
+      var row = Math.floor(Math.random() * (maxRow + 1));
+      var col = Math.floor(Math.random() * (maxCol + 1));
+      cells = tryPlaceShip(board, size, row, col, orientation);
+    }
+
+    if (cells === null) continue;
+
+    for (var i = 0; i < cells.length; i++) {
+      board[cells[i].row][cells[i].col] = 'ship';
+    }
+
+    placed.push({
+      name: def.name,
+      size: size,
+      cells: cells
+    });
+  }
+
+  return { board: board, ships: placed };
+}
+
+function createAIState() {
+  return {
+    previousShots: {},
+    hitQueue:      [],
+    lastHits:      [],
+    shotCount:     0
+  };
+}
+
+function updateAIState(aiState, row, col, result) {
+  var key = row + ',' + col;
+  aiState.previousShots[key] = true;
+  aiState.shotCount++;
+
+  if (result === 'hit') {
+    aiState.lastHits.push({ row: row, col: col });
+    addAdjacentTargets(aiState, row, col);
+  } else if (result === 'sunk') {
+    aiState.lastHits.push({ row: row, col: col });
+    pruneAfterSink(aiState);
+  }
+}
+
+function addAdjacentTargets(aiState, row, col) {
+  var directions = [
+    { row: row - 1, col: col },
+    { row: row + 1, col: col },
+    { row: row,     col: col - 1 },
+    { row: row,     col: col + 1 }
+  ];
+
+  for (var d = 0; d < directions.length; d++) {
+    var r = directions[d].row;
+    var c = directions[d].col;
+    if (r < 0 || r >= 10 || c < 0 || c >= 10) continue;
+
+    var key = r + ',' + c;
+    if (aiState.previousShots[key]) continue;
+
+    var alreadyQueued = false;
+    for (var q = 0; q < aiState.hitQueue.length; q++) {
+      if (aiState.hitQueue[q].row === r && aiState.hitQueue[q].col === c) {
+        alreadyQueued = true;
+        break;
+      }
+    }
+    if (!alreadyQueued) {
+      aiState.hitQueue.push({ row: r, col: c });
+    }
+  }
+
+  if (aiState.lastHits.length >= 2) {
+    prioritiseLineDirection(aiState);
+  }
+}
+
+function prioritiseLineDirection(aiState) {
+  var hits = aiState.lastHits;
+  if (hits.length < 2) return;
+
+  var allSameRow = true;
+  var allSameCol = true;
+  for (var i = 1; i < hits.length; i++) {
+    if (hits[i].row !== hits[0].row) allSameRow = false;
+    if (hits[i].col !== hits[0].col) allSameCol = false;
+  }
+
+  if (!allSameRow && !allSameCol) return;
+
+  var priority = [];
+  var rest = [];
+
+  for (var q = 0; q < aiState.hitQueue.length; q++) {
+    var cell = aiState.hitQueue[q];
+    var isOnLine = false;
+
+    if (allSameRow && cell.row === hits[0].row) isOnLine = true;
+    if (allSameCol && cell.col === hits[0].col) isOnLine = true;
+
+    if (isOnLine) {
+      priority.push(cell);
+    } else {
+      rest.push(cell);
+    }
+  }
+
+  aiState.hitQueue = priority.concat(rest);
+}
+
+function pruneAfterSink(aiState) {
+  var sunkKeys = {};
+  for (var i = 0; i < aiState.lastHits.length; i++) {
+    var h = aiState.lastHits[i];
+    sunkKeys[h.row + ',' + h.col] = true;
+  }
+
+  var newQueue = [];
+  for (var q = 0; q < aiState.hitQueue.length; q++) {
+    var cell = aiState.hitQueue[q];
+    var key = cell.row + ',' + cell.col;
+    if (aiState.previousShots[key]) continue;
+    newQueue.push(cell);
+  }
+
+  var filtered = [];
+  for (var f = 0; f < newQueue.length; f++) {
+    var c = newQueue[f];
+    var adjToNonSunk = false;
+
+    var neighbours = [
+      (c.row - 1) + ',' + c.col,
+      (c.row + 1) + ',' + c.col,
+      c.row + ',' + (c.col - 1),
+      c.row + ',' + (c.col + 1)
+    ];
+
+    for (var n = 0; n < neighbours.length; n++) {
+      if (aiState.previousShots[neighbours[n]] && !sunkKeys[neighbours[n]]) {
+        adjToNonSunk = true;
+        break;
+      }
+    }
+
+    var adjToSunk = false;
+    for (var n2 = 0; n2 < neighbours.length; n2++) {
+      if (sunkKeys[neighbours[n2]]) {
+        adjToSunk = true;
+        break;
+      }
+    }
+
+    if (!adjToSunk || adjToNonSunk) {
+      filtered.push(c);
+    }
+  }
+
+  aiState.hitQueue = filtered;
+  aiState.lastHits = [];
+}
+
+function getAIShot(aiState) {
+  while (aiState.hitQueue.length > 0) {
+    var target = aiState.hitQueue.shift();
+    var key = target.row + ',' + target.col;
+    if (!aiState.previousShots[key]) {
+      return { row: target.row, col: target.col };
+    }
+  }
+
+  var candidates = [];
+  var fallback   = [];
+
+  for (var r = 0; r < 10; r++) {
+    for (var c = 0; c < 10; c++) {
+      var k = r + ',' + c;
+      if (aiState.previousShots[k]) continue;
+      if ((r + c) % 2 === 0) {
+        candidates.push({ row: r, col: c });
+      } else {
+        fallback.push({ row: r, col: c });
+      }
+    }
+  }
+
+  var pool = candidates.length > 0 ? candidates : fallback;
+
+  if (pool.length === 0) {
+    return { row: 0, col: 0 };
+  }
+
+  var pick = Math.floor(Math.random() * pool.length);
+  return { row: pool[pick].row, col: pool[pick].col };
+}
+
+// ============================================================
+// GLUE CODE — wires engine + AI + UI together
+// ============================================================
+
+(function () {
+  // ----- DOM references -----
+  var statusEl       = document.getElementById('status-message');
+  var placementPanel = document.getElementById('placement-panel');
+  var rotateBtn      = document.getElementById('rotate-btn');
+  var playerGrid     = document.getElementById('player-grid');
+  var enemyGrid      = document.getElementById('enemy-grid');
+  var overlay        = document.getElementById('game-over-overlay');
+  var overMsg        = document.getElementById('game-over-message');
+  var playAgainBtn   = document.getElementById('play-again-btn');
+  var shipOptions    = document.querySelectorAll('.ship-option');
+
+  // ----- Game state -----
+  var phase = 'placement'; // 'placement' | 'battle' | 'gameover'
+  var playerBoard = createBoard();
+  var playerShips = [];
+  var enemyBoard  = null;
+  var enemyShips  = null;   // engine-format ships for processShot
+  var aiState     = null;
+  var horizontal  = true;   // current placement orientation
+  var locked      = false;  // prevent clicks during AI turn
+
+  // Ship placement order — tracks which ship the player is placing
+  var shipDefs = [
+    { key: 'carrier',    name: 'Carrier',    size: 5 },
+    { key: 'battleship', name: 'Battleship', size: 4 },
+    { key: 'cruiser',    name: 'Cruiser',    size: 3 },
+    { key: 'submarine',  name: 'Submarine',  size: 3 },
+    { key: 'destroyer',  name: 'Destroyer',  size: 2 }
+  ];
+  var currentShipIndex = 0;
+  var placedShips = {};  // key -> true
+
+  // ----- Helpers -----
+
+  function getCell(grid, row, col) {
+    return grid.querySelector('.cell[data-row="' + row + '"][data-col="' + col + '"]');
+  }
+
+  function setStatus(msg) {
+    statusEl.textContent = msg;
+  }
+
+  function currentShipDef() {
+    if (currentShipIndex >= shipDefs.length) return null;
+    return shipDefs[currentShipIndex];
+  }
+
+  // Convert AI-format ships (with .cells) to engine-format (with .positions, .hits, .sunk)
+  function convertAIShipsToEngine(aiShipList) {
+    var engineShips = [];
+    for (var i = 0; i < aiShipList.length; i++) {
+      var s = aiShipList[i];
+      engineShips.push({
+        name: s.name,
+        size: s.size,
+        positions: s.cells.slice(), // same structure: [{row, col}, ...]
+        hits: 0,
+        sunk: false
+      });
+    }
+    return engineShips;
+  }
+
+  // Get cells that a ship would occupy starting at (row, col)
+  function getShipCells(size, row, col, horiz) {
+    var cells = [];
+    for (var i = 0; i < size; i++) {
+      var r = horiz ? row : row + i;
+      var c = horiz ? col + i : col;
+      cells.push({ row: r, col: c });
+    }
+    return cells;
+  }
+
+  // ----- Placement preview -----
+
+  var previewCells = [];
+
+  function clearPreview() {
+    for (var i = 0; i < previewCells.length; i++) {
+      previewCells[i].classList.remove('preview-valid', 'preview-invalid');
+    }
+    previewCells = [];
+  }
+
+  function showPreview(row, col) {
+    clearPreview();
+    var def = currentShipDef();
+    if (!def) return;
+
+    var valid = canPlaceShip(playerBoard, def.size, row, col, horizontal);
+    var cells = getShipCells(def.size, row, col, horizontal);
+    var cls = valid ? 'preview-valid' : 'preview-invalid';
+
+    for (var i = 0; i < cells.length; i++) {
+      var r = cells[i].row;
+      var c = cells[i].col;
+      if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+        var el = getCell(playerGrid, r, c);
+        if (el) {
+          el.classList.add(cls);
+          previewCells.push(el);
+        }
+      }
+    }
+  }
+
+  // ----- Ship option selection -----
+
+  function selectShipOption(index) {
+    for (var i = 0; i < shipOptions.length; i++) {
+      shipOptions[i].classList.remove('active');
+    }
+    if (index < shipOptions.length) {
+      shipOptions[index].classList.add('active');
+    }
+  }
+
+  function markShipPlaced(index) {
+    if (index < shipOptions.length) {
+      shipOptions[index].classList.add('placed');
+      shipOptions[index].classList.remove('active');
+    }
+  }
+
+  // Ship option click — select an unplaced ship
+  for (var si = 0; si < shipOptions.length; si++) {
+    (function (idx) {
+      shipOptions[idx].addEventListener('click', function () {
+        if (phase !== 'placement') return;
+        var def = shipDefs[idx];
+        if (placedShips[def.key]) return; // already placed
+        currentShipIndex = idx;
+        selectShipOption(idx);
+        setStatus('Place your ' + def.name + ' (' + def.size + ' cells)');
+      });
+    })(si);
+  }
+
+  // ----- Player grid: placement hover + click -----
+
+  var playerCells = playerGrid.querySelectorAll('.cell');
+
+  for (var pi = 0; pi < playerCells.length; pi++) {
+    (function (cell) {
+      cell.addEventListener('mouseenter', function () {
+        if (phase !== 'placement') return;
+        var row = parseInt(cell.getAttribute('data-row'), 10);
+        var col = parseInt(cell.getAttribute('data-col'), 10);
+        showPreview(row, col);
+      });
+
+      cell.addEventListener('mouseleave', function () {
+        if (phase !== 'placement') return;
+        clearPreview();
+      });
+
+      cell.addEventListener('click', function () {
+        if (phase !== 'placement') return;
+        var def = currentShipDef();
+        if (!def) return;
+
+        var row = parseInt(cell.getAttribute('data-row'), 10);
+        var col = parseInt(cell.getAttribute('data-col'), 10);
+
+        var result = placeShip(playerBoard, playerShips, def.name, def.size, row, col, horizontal);
+        if (result === null) return; // invalid
+
+        clearPreview();
+
+        // Show ship on player grid
+        var cells = getShipCells(def.size, row, col, horizontal);
+        for (var c = 0; c < cells.length; c++) {
+          var el = getCell(playerGrid, cells[c].row, cells[c].col);
+          if (el) el.classList.add('ship');
+        }
+
+        // Mark placed
+        placedShips[def.key] = true;
+        markShipPlaced(currentShipIndex);
+
+        // Move to next unplaced ship
+        var foundNext = false;
+        for (var n = 0; n < shipDefs.length; n++) {
+          if (!placedShips[shipDefs[n].key]) {
+            currentShipIndex = n;
+            selectShipOption(n);
+            setStatus('Place your ' + shipDefs[n].name + ' (' + shipDefs[n].size + ' cells)');
+            foundNext = true;
+            break;
+          }
+        }
+
+        if (!foundNext) {
+          // All ships placed — start battle
+          startBattle();
+        }
+      });
+    })(playerCells[pi]);
+  }
+
+  // ----- Rotate -----
+
+  rotateBtn.addEventListener('click', function () {
+    horizontal = !horizontal;
+    rotateBtn.textContent = horizontal ? 'Rotate (R) — Horizontal' : 'Rotate (R) — Vertical';
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'r' || e.key === 'R') {
+      if (phase === 'placement') {
+        horizontal = !horizontal;
+        rotateBtn.textContent = horizontal ? 'Rotate (R) — Horizontal' : 'Rotate (R) — Vertical';
+      }
+    }
+  });
+
+  // ----- Battle phase -----
+
+  function startBattle() {
+    phase = 'battle';
+
+    // Hide placement panel
+    placementPanel.classList.add('hidden');
+
+    // AI places its ships
+    var aiResult = aiPlaceShips(null, null);
+    enemyBoard = aiResult.board;
+    enemyShips = convertAIShipsToEngine(aiResult.ships);
+
+    // Create AI state
+    aiState = createAIState();
+
+    setStatus("Your turn \u2014 fire at enemy waters!");
+  }
+
+  // ----- Enemy grid: battle clicks -----
+
+  var enemyCells = enemyGrid.querySelectorAll('.cell');
+
+  for (var ei = 0; ei < enemyCells.length; ei++) {
+    (function (cell) {
+      cell.addEventListener('click', function () {
+        if (phase !== 'battle') return;
+        if (locked) return;
+
+        var row = parseInt(cell.getAttribute('data-row'), 10);
+        var col = parseInt(cell.getAttribute('data-col'), 10);
+
+        // Prevent clicking already-shot cells
+        if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) {
+          return;
+        }
+
+        locked = true;
+
+        // Player fires
+        var shot = processShot(enemyBoard, enemyShips, row, col);
+
+        if (shot.alreadyFired) {
+          locked = false;
+          return;
+        }
+
+        // Update enemy grid visually
+        if (shot.result === 'sunk') {
+          // Mark ALL cells of the sunk ship
+          var sunkShip = getShipAt(enemyShips, row, col);
+          if (sunkShip) {
+            for (var p = 0; p < sunkShip.positions.length; p++) {
+              var pos = sunkShip.positions[p];
+              var sunkCell = getCell(enemyGrid, pos.row, pos.col);
+              if (sunkCell) {
+                sunkCell.classList.remove('hit', 'miss');
+                sunkCell.classList.add('sunk');
+              }
+            }
+          }
+          setStatus("You sunk their " + shot.shipName + "!");
+        } else if (shot.result === 'hit') {
+          cell.classList.add('hit');
+          setStatus("Hit!");
+        } else {
+          cell.classList.add('miss');
+          setStatus("Miss!");
+        }
+
+        // Check win
+        if (isGameOver(enemyShips)) {
+          phase = 'gameover';
+          showGameOver(true);
+          return;
+        }
+
+        // AI turn after delay
+        setTimeout(function () {
+          doAITurn();
+        }, 500);
+      });
+    })(enemyCells[ei]);
+  }
+
+  // ----- AI turn -----
+
+  function doAITurn() {
+    var target = getAIShot(aiState);
+    var shot = processShot(playerBoard, playerShips, target.row, target.col);
+
+    // Update AI state
+    updateAIState(aiState, target.row, target.col, shot.result);
+
+    // Update player grid visually
+    var cell = getCell(playerGrid, target.row, target.col);
+
+    if (shot.result === 'sunk') {
+      var sunkShip = getShipAt(playerShips, target.row, target.col);
+      if (sunkShip) {
+        for (var p = 0; p < sunkShip.positions.length; p++) {
+          var pos = sunkShip.positions[p];
+          var sunkCell = getCell(playerGrid, pos.row, pos.col);
+          if (sunkCell) {
+            sunkCell.classList.remove('ship', 'hit', 'miss');
+            sunkCell.classList.add('sunk');
+          }
+        }
+      }
+      setStatus("Enemy sunk your " + shot.shipName + "!");
+    } else if (shot.result === 'hit') {
+      if (cell) {
+        cell.classList.remove('ship');
+        cell.classList.add('hit');
+      }
+      setStatus("Enemy hit your " + shot.shipName + "!");
+    } else {
+      if (cell) {
+        cell.classList.add('miss');
+      }
+      setStatus("Enemy missed!");
+    }
+
+    // Check loss
+    if (isGameOver(playerShips)) {
+      phase = 'gameover';
+      showGameOver(false);
+      return;
+    }
+
+    // Unlock for player's next turn
+    setTimeout(function () {
+      locked = false;
+      setStatus("Your turn \u2014 fire at enemy waters!");
+    }, 300);
+  }
+
+  // ----- Game over -----
+
+  function showGameOver(playerWon) {
+    locked = true;
+    if (playerWon) {
+      overMsg.textContent = "Victory! You sank the enemy fleet!";
+    } else {
+      overMsg.textContent = "Defeat! Your fleet has been destroyed!";
+    }
+    overlay.classList.add('visible');
+  }
+
+  playAgainBtn.addEventListener('click', function () {
+    location.reload();
+  });
+
+  // ----- Init -----
+  setStatus('Place your ' + shipDefs[0].name + ' (' + shipDefs[0].size + ' cells)');
+})();
+  </script>
+</body>
+</html>
