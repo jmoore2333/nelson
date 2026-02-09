@@ -10,7 +10,10 @@ Nelson is a Claude Code skill for coordinating agent work using Royal Navy termi
   references/           — Supporting docs loaded on demand
     action-stations.md  — Risk tier definitions (Station 0–3)
     admiralty-templates.md — Reusable templates (orders, plans, logs)
+    damage-control.md   — Error recovery and escalation procedures
+    mission-patterns.md — Pre-built patterns for common mission types
     squadron-composition.md — Mode selection & team sizing rules
+    standing-orders.md  — Anti-patterns and standing orders
   agents/               — Agent interface definitions
 demos/                  — Example applications built with Nelson
 ```

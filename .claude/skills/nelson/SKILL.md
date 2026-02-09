@@ -28,6 +28,7 @@ Use `references/admiralty-templates.md` section "Sailing Orders Template" when t
 - Do not exceed 10 total agents.
 
 Use `references/squadron-composition.md` for selection rules.
+Consult `references/mission-patterns.md` for pre-built patterns for common mission types.
 
 ## 3. Draft Battle Plan
 
@@ -46,6 +47,7 @@ Use `references/admiralty-templates.md` section "Battle Plan Template".
 - Identify blockers and choose a concrete next action.
 - Track burn against token/time budget.
 - Re-scope early when a task drifts from mission metric.
+- When a mission encounters difficulties, consult `references/damage-control.md` for recovery and escalation procedures.
 
 Use `references/admiralty-templates.md` section "Quarterdeck Report Template".
 
@@ -79,3 +81,4 @@ Use `references/admiralty-templates.md` section "Captain's Log Template".
 - Prefer replacing stalled agents over waiting on undefined blockers.
 - Keep coordination messages targeted and concise.
 - Escalate uncertainty early with options and one recommendation.
+- Consult `references/standing-orders.md` for known anti-patterns and standing orders.

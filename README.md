@@ -181,7 +181,10 @@ The skill includes structured templates for consistent output across missions:
 └── references/
     ├── action-stations.md                    # Risk tier definitions and controls
     ├── admiralty-templates.md                # Reusable templates for all phases
-    └── squadron-composition.md              # Mode selection and team sizing rules
+    ├── damage-control.md                     # Error recovery and escalation procedures
+    ├── mission-patterns.md                   # Pre-built patterns for common mission types
+    ├── squadron-composition.md              # Mode selection and team sizing rules
+    └── standing-orders.md                    # Anti-patterns and standing orders
 ```
 
 - `SKILL.md` is the entrypoint that Claude reads when the skill is invoked. It defines the six-step workflow and references the supporting files.
