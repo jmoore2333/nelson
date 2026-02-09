@@ -1,9 +1,9 @@
 # Nelson
 
 <p align="center">
-  <img src="HMP_RNM_1973_76-001.jpg" alt="HMS Victory anchored off the Isle of Wight" width="700">
+  <img src="1024px-Young_Nelson-min.jpg" alt="Captain Horatio Nelson" width="500">
   <br>
-  <em>HMS Victory anchored off the Isle of Wight — John Wilson Carmichael (1799–1868), National Museum of the Royal Navy, Portsmouth</em>
+  <em>Captain Horatio Nelson — John Francis Rigaud, 1781. Image: Wikimedia Commons</em>
 </p>
 
 A Claude Code skill for coordinating agent work using a Royal Navy themed workflow. It provides structured sailing orders, battle plans, action stations, and a captain's log to manage complex tasks — from single-session work through to parallel subagent squadrons.
@@ -98,6 +98,12 @@ Scope:
 ```
 
 ## How it works
+
+<p align="center">
+  <img src="HMP_RNM_1973_76-001.jpg" alt="HMS Victory anchored off the Isle of Wight" width="700">
+  <br>
+  <em>HMS Victory anchored off the Isle of Wight — John Wilson Carmichael (1799–1868), National Museum of the Royal Navy, Portsmouth</em>
+</p>
 
 ### Execution modes
 
