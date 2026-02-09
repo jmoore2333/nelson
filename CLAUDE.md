@@ -21,15 +21,14 @@ This is a documentation-driven skill with zero runtime dependencies. There is no
 
 ## Testing changes
 
-Install the skill locally and run a mission to verify:
+Install the skill locally and run a mission to verify. Either tell Claude Code "Install skills from https://github.com/harrymunro/nelson" or copy the skill directory manually:
 
 ```bash
-# Project-level
-mkdir -p .claude/skills
+mkdir -p <target-project>/.claude/skills
 cp -r .claude/skills/nelson <target-project>/.claude/skills/nelson
-
-# Then in Claude Code, invoke: /nelson
 ```
+
+Then invoke `/nelson` in Claude Code.
 
 ## Code style
 

@@ -33,23 +33,32 @@ Nelson gives Claude a six-step operational framework for tackling complex missio
 
 ## Installation
 
-Copy the skill into your project's `.claude/skills/` directory, or into your personal `~/.claude/skills/` directory to make it available across all projects.
+### Prompt-based (recommended)
 
-### Project-level (recommended for teams)
+Open Claude Code and say:
+
+```
+Install skills from https://github.com/harrymunro/nelson
+```
+
+Claude will clone the repo, copy the skill into your project's `.claude/skills/` directory, and clean up. To install it globally across all projects, ask Claude to install it to `~/.claude/skills/` instead.
+
+### Manual
+
+Clone the repo and copy the skill directory yourself:
 
 ```bash
-# From your project root
+# Project-level (recommended for teams)
+git clone https://github.com/harrymunro/nelson.git /tmp/nelson
 mkdir -p .claude/skills
-cp -r nelson .claude/skills/nelson
+cp -r /tmp/nelson/.claude/skills/nelson .claude/skills/nelson
+rm -rf /tmp/nelson
+
+# Or user-level (personal, all projects)
+cp -r /tmp/nelson/.claude/skills/nelson ~/.claude/skills/nelson
 ```
 
 Then commit `.claude/skills/nelson/` to version control so your team can use it.
-
-### User-level (personal, all projects)
-
-```bash
-cp -r nelson ~/.claude/skills/nelson
-```
 
 ### Verify installation
 
