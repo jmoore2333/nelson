@@ -10,6 +10,10 @@ A Claude Code skill for coordinating agent work based on the Royal Navy. It prov
 
 ## What it does
 
+
+https://github.com/user-attachments/assets/91df06fc-0b61-4925-a934-4c7fdcbf0457
+
+
 Nelson gives Claude a six-step operational framework for tackling complex missions:
 
 1. **Sailing Orders** — Define the outcome, success metric, constraints, and stop criteria
