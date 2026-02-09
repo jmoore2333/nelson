@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Victory"
+  short_description: "England expects every agent to do its duty"
+  default_prompt: "Use $project-victory to run a Royal Navy themed agent mission with sailing orders, action stations, and a captain's log."
