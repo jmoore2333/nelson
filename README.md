@@ -40,6 +40,8 @@ Nelson gives Claude a six-step operational framework for tackling complex missio
 }
 ```
 
+- **For split-pane visibility:** To see each agent working in its own pane (as shown in the demo video), run Claude Code inside [tmux](https://github.com/tmux/tmux/wiki). Agent teams auto-detect tmux and give every teammate a dedicated split pane so you can watch the whole squadron in action.
+
 ## Installation
 
 ### Prompt-based (recommended)
