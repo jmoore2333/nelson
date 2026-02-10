@@ -30,6 +30,15 @@ Nelson gives Claude a six-step operational framework for tackling complex missio
 ## Prerequisites
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed and authenticated
+- **Recommended:** Enable [agent teams](https://code.claude.com/docs/en/agent-teams) for the full squadron experience. Nelson works without it (using single-session or subagent modes), but agent teams unlock teammate-to-teammate coordination — the `agent-team` execution mode. Enable it in your [settings.json](https://code.claude.com/docs/en/settings):
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
 
 ## Installation
 
@@ -204,17 +213,7 @@ Edit `references/squadron-composition.md` to adjust the decision matrix or defau
 ## Compatibility notes
 
 - **Subagents** are a stable Claude Code feature and work out of the box.
-- **Agent teams** are experimental and disabled by default. To use the `agent-team` execution mode, enable agent teams by adding `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to your environment or [settings.json](https://code.claude.com/docs/en/settings):
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
-
-Without this setting, Claude will use `single-session` or `subagents` mode instead.
+- **Agent teams** are experimental and disabled by default. See [Prerequisites](#prerequisites) above for setup. Without agent teams enabled, Nelson falls back to `single-session` or `subagents` mode. Full details: [Agent teams documentation](https://code.claude.com/docs/en/agent-teams).
 
 ## Disclaimer
 
