@@ -14,7 +14,7 @@ Execute this workflow for the user's mission.
 - Define what is out of scope.
 - Define stop criteria and required handoff artifacts.
 
-Use `references/admiralty-templates.md` section "Sailing Orders Template" when the user does not provide structure.
+Use `references/admiralty-templates.md` when the user does not provide structure.
 
 ## 2. Form The Squadron
 
@@ -37,7 +37,7 @@ Consult `references/standing-orders.md` before forming the squadron.
 - Assign file ownership when implementation touches code.
 - Keep one task in progress per agent unless the mission explicitly requires multitasking.
 
-Use `references/admiralty-templates.md` section "Battle Plan Template".
+Use `references/admiralty-templates.md` for the battle plan template.
 Consult `references/standing-orders.md` when assigning files or if scope is unclear.
 
 ## 4. Run Quarterdeck Rhythm
@@ -50,7 +50,7 @@ Consult `references/standing-orders.md` when assigning files or if scope is uncl
 - Re-scope early when a task drifts from mission metric.
 - When a mission encounters difficulties, consult `references/damage-control.md` for recovery and escalation procedures.
 
-Use `references/admiralty-templates.md` section "Quarterdeck Report Template".
+Use `references/admiralty-templates.md` for the quarterdeck report template.
 Consult `references/standing-orders.md` if admiral is doing implementation or tasks are drifting from scope.
 
 ## 5. Set Action Stations
@@ -77,7 +77,7 @@ Consult `references/standing-orders.md` if tasks lack a tier or red-cell is assi
 - Open risks and follow-ups.
 - Record reusable patterns and failure modes for future missions.
 
-Use `references/admiralty-templates.md` section "Captain's Log Template".
+Use `references/admiralty-templates.md` for the captain's log template.
 
 ## Admiralty Doctrine
 
