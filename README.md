@@ -143,15 +143,48 @@ The skill selects one of three execution modes based on your mission:
 | `subagents` | Parallel tasks where workers only report back to the coordinator | Claude spawns [subagents](https://code.claude.com/docs/en/sub-agents) that work independently and return results |
 | `agent-team` | Parallel tasks where workers need to coordinate with each other | Claude creates an [agent team](https://code.claude.com/docs/en/agent-teams) with direct teammate-to-teammate communication |
 
-### Team composition
+### Chain of command
 
-Teams follow a simple hierarchy:
+Nelson uses a three-tier hierarchy. The admiral coordinates captains, each captain commands a named ship, and crew members aboard each ship do the specialist work.
+
+```
+                          ┌───────────┐
+                          │  Admiral  │
+                          └─────┬─────┘
+                  ┌─────────────┼─────────────┐
+                  ▼             ▼             ▼
+           ┌───────────┐ ┌───────────┐ ┌───────────┐
+           │  Captain   │ │  Captain   │ │ Red-Cell  │
+           │ HMS Daring │ │ HMS Kent   │ │ Navigator │
+           └─────┬─────┘ └─────┬─────┘ └───────────┘
+            ┌────┼────┐   ┌────┼────┐
+            ▼    ▼    ▼   ▼    ▼    ▼
+           XO  PWO  MEO  PWO  NO  COX
+```
+
+**Squadron level:**
 
 - **Admiral** — Coordinates the mission, delegates tasks, resolves blockers, produces the final synthesis. There is always exactly one.
-- **Captains** — Own individual tasks and their deliverables. Typically 2-7 per mission.
+- **Captains** — Each commands a named ship. Breaks their task into sub-tasks, crews specialist roles, coordinates crew, and verifies outputs. Implements directly only when the task is atomic. Typically 2-7 per mission.
 - **Red-cell navigator** — Challenges assumptions, validates outputs, and checks rollback readiness. Added for medium/high risk work.
 
-Team size scales with mission complexity. The skill caps at 10 total agents to keep coordination overhead manageable.
+**Ship level (crew per captain, 0-4 members):**
+
+| Role | Abbr | Function | When to crew |
+|------|------|----------|-------------|
+| Executive Officer | XO | Integration & orchestration | 3+ crew or interdependent sub-tasks |
+| Principal Warfare Officer | PWO | Core implementation | Almost always (default doer) |
+| Navigating Officer | NO | Codebase research & exploration | Unfamiliar code, large codebase |
+| Marine Engineering Officer | MEO | Testing & validation | Station 1+ or non-trivial verification |
+| Weapon Engineering Officer | WEO | Config, infrastructure & systems integration | Significant config/infra work |
+| Logistics Officer | LOGO | Documentation & dependency management | Docs as deliverable, dep management |
+| Coxswain | COX | Standards review & quality | Station 1+ with established conventions |
+
+NO and COX are read-only — they report findings but never modify files.
+
+Ships are named from real Royal Navy warships, matched roughly to task weight: frigates for general-purpose, destroyers for high-tempo, patrol vessels for small tasks, historic flagships for critical-path, and submarines for research.
+
+Squadron size caps at 10 squadron-level agents (admiral, captains, red-cell navigator). Crew are additional — up to 4 per ship. If a task needs more crew, split it into two ships.
 
 ### Action stations (risk tiers)
 
@@ -178,6 +211,7 @@ The skill includes structured templates for consistent output across missions:
 
 - **Sailing Orders** — Mission definition with outcome, constraints, scope, and stop criteria
 - **Battle Plan** — Task breakdown with owners, dependencies, threat tiers, and validation requirements
+- **Ship Manifest** — Captain's crew plan with ship name, crew roles, sub-tasks, and budget
 - **Quarterdeck Report** — Checkpoint status with progress, blockers, budget tracking, and risk updates
 - **Red-Cell Review** — Adversarial review with challenge summary, checks, and recommendation
 - **Captain's Log** — Final report with delivered artifacts, decisions, validation evidence, and follow-ups
@@ -197,9 +231,12 @@ The skill includes structured templates for consistent output across missions:
     │   ├── captains-log.md
     │   ├── quarterdeck-report.md
     │   ├── red-cell-review.md
-    │   └── sailing-orders.md
+    │   ├── sailing-orders.md
+    │   └── ship-manifest.md
+    ├── crew-roles.md                         # Crew role definitions, ship names, sizing
     ├── damage-control.md                     # Error recovery routing index
     ├── damage-control/                       # Individual procedure files
+    │   ├── crew-overrun.md
     │   ├── escalation.md
     │   ├── man-overboard.md
     │   ├── partial-rollback.md
@@ -209,10 +246,14 @@ The skill includes structured templates for consistent output across missions:
     ├── standing-orders.md                    # Anti-pattern routing index
     └── standing-orders/                      # Individual anti-pattern files
         ├── admiral-at-the-helm.md
+        ├── all-hands-on-deck.md
         ├── becalmed-fleet.md
+        ├── captain-at-the-capstan.md
         ├── crew-without-canvas.md
         ├── drifting-anchorage.md
         ├── press-ganged-navigator.md
+        ├── pressed-crew.md
+        ├── skeleton-crew.md
         ├── split-keel.md
         └── unclassified-engagement.md
 ```

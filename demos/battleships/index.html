@@ -1072,6 +1072,283 @@ select:focus-visible,
   }
   .label { font-size: 0.6rem; }
 }
+
+/* ============================================================
+   SHIP SHAPE RENDERING — Bow / Hull / Stern segments
+   ============================================================ */
+
+/* --- Ship type accent colours --- */
+.cell.ship.ship-carrier {
+  --ship-accent: var(--signal-gold);
+  --ship-accent-glow: rgba(241, 196, 15, 0.25);
+}
+.cell.ship.ship-battleship {
+  --ship-accent: var(--steel-chrome);
+  --ship-accent-glow: rgba(119, 141, 169, 0.25);
+}
+.cell.ship.ship-cruiser {
+  --ship-accent: var(--ocean-foam);
+  --ship-accent-glow: rgba(44, 110, 138, 0.3);
+}
+.cell.ship.ship-submarine {
+  --ship-accent: var(--signal-green);
+  --ship-accent-glow: rgba(46, 204, 113, 0.25);
+}
+.cell.ship.ship-destroyer {
+  --ship-accent: #e07a5f;
+  --ship-accent-glow: rgba(224, 122, 95, 0.25);
+}
+
+/* Accent stripe via ::after */
+.cell.ship.ship-carrier::after,
+.cell.ship.ship-battleship::after,
+.cell.ship.ship-cruiser::after,
+.cell.ship.ship-submarine::after,
+.cell.ship.ship-destroyer::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* --- Horizontal hull accent stripe (top edge) --- */
+.cell.ship.ship-hull-h::after {
+  top: 0; left: 15%; right: 15%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ship-accent, var(--steel-bright)) 30%, var(--ship-accent, var(--steel-bright)) 70%, transparent);
+  opacity: 0.6;
+}
+
+/* --- Vertical hull accent stripe (left edge) --- */
+.cell.ship.ship-hull-v::after {
+  left: 0; top: 15%; bottom: 15%; width: 2px;
+  background: linear-gradient(180deg, transparent, var(--ship-accent, var(--steel-bright)) 30%, var(--ship-accent, var(--steel-bright)) 70%, transparent);
+  opacity: 0.6;
+}
+
+/* --- Horizontal bow (left end, points left) --- */
+.cell.ship.ship-bow-h {
+  clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 30% 100%, 0% 50%);
+  background: linear-gradient(145deg, #506fa8 0%, #3d5d8a 50%, #4a6fa5 100%);
+}
+.cell.ship.ship-bow-h::after {
+  top: 0; left: 30%; right: 15%; height: 2px;
+  background: linear-gradient(90deg, var(--ship-accent, var(--steel-bright)), transparent);
+  opacity: 0.6;
+}
+
+/* --- Horizontal stern (right end, flat/rounded) --- */
+.cell.ship.ship-stern-h {
+  border-radius: 0 6px 6px 0;
+  background: linear-gradient(145deg, #3d5d8a 0%, #34506f 50%, #3d5d8a 100%);
+}
+.cell.ship.ship-stern-h::after {
+  top: 0; left: 15%; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ship-accent, var(--steel-bright)));
+  opacity: 0.5;
+}
+
+/* --- Vertical bow (top end, points up) --- */
+.cell.ship.ship-bow-v {
+  clip-path: polygon(0% 30%, 50% 0%, 100% 30%, 100% 100%, 0% 100%);
+  background: linear-gradient(180deg, #506fa8 0%, #3d5d8a 50%, #4a6fa5 100%);
+}
+.cell.ship.ship-bow-v::after {
+  left: 0; top: 30%; bottom: 15%; width: 2px;
+  background: linear-gradient(180deg, var(--ship-accent, var(--steel-bright)), transparent);
+  opacity: 0.6;
+}
+
+/* --- Vertical stern (bottom end, flat/rounded) --- */
+.cell.ship.ship-stern-v {
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(180deg, #3d5d8a 0%, #34506f 50%, #3d5d8a 100%);
+}
+.cell.ship.ship-stern-v::after {
+  left: 0; top: 15%; bottom: 0; width: 2px;
+  background: linear-gradient(180deg, transparent, var(--ship-accent, var(--steel-bright)));
+  opacity: 0.5;
+}
+
+/* --- Hull segments (middle cells) --- */
+.cell.ship.ship-hull-h {
+  background: linear-gradient(145deg, #4a6fa5 0%, #3d5d8a 40%, #516f96 70%, #4a6fa5 100%);
+  border-left: 1px solid rgba(90, 138, 191, 0.15);
+  border-right: 1px solid rgba(90, 138, 191, 0.15);
+}
+
+.cell.ship.ship-hull-v {
+  background: linear-gradient(180deg, #4a6fa5 0%, #3d5d8a 40%, #516f96 70%, #4a6fa5 100%);
+  border-top: 1px solid rgba(90, 138, 191, 0.15);
+  border-bottom: 1px solid rgba(90, 138, 191, 0.15);
+}
+
+/* Accent glow on ship type */
+.cell.ship[class*="ship-carrier"],
+.cell.ship[class*="ship-battleship"],
+.cell.ship[class*="ship-cruiser"],
+.cell.ship[class*="ship-submarine"],
+.cell.ship[class*="ship-destroyer"] {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.15),
+    inset 0 0 6px var(--ship-accent-glow, transparent);
+}
+
+/* -- Particle Canvas Overlay -- */
+#particle-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* -- Stats Panel -- */
+.stats-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-subtle);
+  max-width: 740px;
+  width: 92%;
+  margin: 1rem auto 0;
+  position: relative;
+  animation: fadeIn 0.6s ease-out 0.6s both;
+}
+
+.stats-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+}
+
+.stats-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  font-weight: 700;
+  transition: color var(--transition-fast);
+}
+
+.stats-panel-header:hover {
+  color: var(--text-secondary);
+}
+
+.stats-toggle-arrow {
+  font-size: 0.65rem;
+  transition: transform var(--transition-mid);
+}
+
+.stats-panel-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.8rem;
+  padding: 0 1.2rem 1rem;
+}
+
+.stats-panel .stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stats-panel .stat-item .stat-item-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.stats-panel .stat-item .stat-item-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stats-panel .reset-btn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  justify-self: start;
+  margin-top: 0.2rem;
+}
+
+.stats-panel .reset-btn:hover {
+  border-color: var(--signal-red);
+  color: var(--signal-red);
+}
+
+/* -- Status Bar -- */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0.6rem auto;
+  max-width: 740px;
+  width: 92%;
+}
+
+.status-bar #status-message {
+  margin: 0;
+  flex: 1;
+}
+
+/* -- Live Score Display -- */
+.live-score {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--signal-gold);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 8px rgba(241, 196, 15, 0.3);
+}
+
+@keyframes scoreFlash {
+  0%   { color: #fff; text-shadow: 0 0 12px rgba(241, 196, 15, 0.8); }
+  100% { color: var(--signal-gold); text-shadow: 0 0 8px rgba(241, 196, 15, 0.3); }
+}
+
+.score-flash {
+  animation: scoreFlash 0.4s ease-out;
+}
+
+/* -- Revealed enemy ships (game over) -- */
+.cell.revealed {
+  background: linear-gradient(135deg, rgba(74, 111, 165, 0.2) 0%, rgba(90, 138, 191, 0.15) 100%);
+  border: 2px dashed rgba(90, 138, 191, 0.5);
+  box-shadow: inset 0 0 10px rgba(74, 111, 165, 0.2);
+}
+
+.cell.revealed::before {
+  animation: none;
+  opacity: 0;
+}
+
+/* -- Keyboard cursor (battle phase) -- */
+#enemy-grid .cell.kb-cursor {
+  outline: 3px solid var(--signal-green);
+  outline-offset: -3px;
+}
   </style>
 </head>
 <body>
@@ -1095,7 +1372,10 @@ select:focus-visible,
     <button class="sound-toggle" id="sound-toggle" title="Toggle sound">Sound: ON</button>
   </div>
 
-  <div id="status-message">Place your ships to begin</div>
+  <div class="status-bar">
+    <div id="status-message">Place your ships to begin</div>
+    <div id="live-score" class="live-score" style="display:none;">Score: <span id="score-value">0</span></div>
+  </div>
 
   <!-- Ship Placement Panel -->
   <div id="placement-panel">
@@ -1107,7 +1387,7 @@ select:focus-visible,
     <div class="ship-option" data-ship="destroyer" data-size="2">Destroyer <span class="ship-size">(2)</span></div>
     <button id="rotate-btn" title="Press R to rotate">Rotate (R)</button>
     <button id="auto-place-btn" title="Auto-place ships randomly">Auto Place</button>
-    <p class="placement-instructions">Click on your grid to place. Press <strong>R</strong> to rotate. Or use <strong>Auto Place</strong>.</p>
+    <p class="placement-instructions">Click on your grid to place. Press <strong>R</strong> to rotate. <strong>Right-click</strong> a placed ship to remove it. Or use <strong>Auto Place</strong>.</p>
   </div>
 
   <!-- Game Boards -->
@@ -1137,6 +1417,37 @@ select:focus-visible,
       <div id="enemy-fleet-list"></div>
     </div>
   </div>
+
+  <!-- Stats Panel -->
+  <div class="stats-panel" id="stats-panel">
+    <div class="stats-panel-header" id="stats-panel-header">
+      <span>Career Statistics</span>
+      <span class="stats-toggle-arrow">&#9654;</span>
+    </div>
+    <div class="stats-panel-body" id="stats-panel-body" style="display:none;">
+      <div class="stat-item">
+        <span class="stat-item-label">Games Played</span>
+        <span class="stat-item-value" id="stat-games-played">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item-label">Win Rate</span>
+        <span class="stat-item-value" id="stat-win-rate">0%</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item-label">Best Accuracy</span>
+        <span class="stat-item-value" id="stat-best-accuracy">0%</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item-label">Win Streak</span>
+        <span class="stat-item-value" id="stat-win-streak">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-item-label">Highest Score</span>
+        <span class="stat-item-value" id="stat-highest-score">0</span>
+      </div>
+      <button class="reset-btn" id="reset-stats-btn">Reset Stats</button>
+    </div>
+  </div>
 </div>
 
 <!-- Game Over Overlay -->
@@ -1147,6 +1458,127 @@ select:focus-visible,
     <button id="play-again-btn">Play Again</button>
   </div>
 </div>
+
+<!-- ============================================================ -->
+<!-- STATISTICS & SCORING -->
+<!-- ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'battleships_stats';
+
+  var defaultStats = {
+    games_played: 0,
+    wins: 0,
+    losses: 0,
+    best_accuracy: 0,
+    worst_accuracy: 100,
+    total_shots: 0,
+    total_hits: 0,
+    current_win_streak: 0,
+    best_win_streak: 0,
+    highest_score: 0
+  };
+
+  var POINTS_HIT = 100;
+  var POINTS_MISS = -25;
+  var BONUS_SINK_MULTIPLIER = 500;
+  var PERFECT_ACCURACY_BONUS = 5000;
+  var SPEED_BONUS_PER_TURN = 50;
+  var SPEED_BONUS_THRESHOLD = 50;
+
+  var stats = null;
+  var currentScore = 0;
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        stats = {};
+        for (var key in defaultStats) {
+          stats[key] = parsed[key] !== undefined ? parsed[key] : defaultStats[key];
+        }
+      } else {
+        stats = JSON.parse(JSON.stringify(defaultStats));
+      }
+    } catch (e) {
+      stats = JSON.parse(JSON.stringify(defaultStats));
+    }
+    return stats;
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+    } catch (e) {}
+  }
+
+  function reset() {
+    stats = JSON.parse(JSON.stringify(defaultStats));
+    save();
+  }
+
+  function getStats() {
+    if (!stats) load();
+    return stats;
+  }
+
+  function getCurrentScore() { return currentScore; }
+  function resetCurrentScore() { currentScore = 0; }
+
+  function scoreHit() { currentScore += POINTS_HIT; return currentScore; }
+
+  function scoreMiss() {
+    currentScore += POINTS_MISS;
+    if (currentScore < 0) currentScore = 0;
+    return currentScore;
+  }
+
+  function scoreSink(shipSize) {
+    currentScore += BONUS_SINK_MULTIPLIER * shipSize;
+    return currentScore;
+  }
+
+  function scoreGameEnd(playerWon, accuracy, turnNumber) {
+    if (playerWon && turnNumber < SPEED_BONUS_THRESHOLD) {
+      currentScore += SPEED_BONUS_PER_TURN * (SPEED_BONUS_THRESHOLD - turnNumber);
+    }
+    if (playerWon && accuracy >= 90) {
+      currentScore += PERFECT_ACCURACY_BONUS;
+    }
+    return currentScore;
+  }
+
+  function recordGame(playerWon, accuracy, shotCount, hitCount) {
+    if (!stats) load();
+    stats.games_played++;
+    stats.total_shots += shotCount;
+    stats.total_hits += hitCount;
+    if (playerWon) {
+      stats.wins++;
+      stats.current_win_streak++;
+      if (stats.current_win_streak > stats.best_win_streak) stats.best_win_streak = stats.current_win_streak;
+    } else {
+      stats.losses++;
+      stats.current_win_streak = 0;
+    }
+    if (accuracy > stats.best_accuracy) stats.best_accuracy = accuracy;
+    if (stats.games_played === 1 || accuracy < stats.worst_accuracy) stats.worst_accuracy = accuracy;
+    if (currentScore > stats.highest_score) stats.highest_score = currentScore;
+    save();
+    return stats;
+  }
+
+  window.Stats = {
+    load: load, save: save, reset: reset, getStats: getStats,
+    getCurrentScore: getCurrentScore, resetCurrentScore: resetCurrentScore,
+    scoreHit: scoreHit, scoreMiss: scoreMiss, scoreSink: scoreSink,
+    scoreGameEnd: scoreGameEnd, recordGame: recordGame
+  };
+})();
+</script>
 
 <!-- ============================================================ -->
 <!-- GAME ENGINE -->
@@ -1197,7 +1629,7 @@ select:focus-visible,
       board[r][c] = 'ship';
       positions.push({ row: r, col: c });
     }
-    ships.push({ name: shipName, size: size, positions: positions, hits: 0, sunk: false });
+    ships.push({ name: shipName, size: size, positions: positions, hits: 0, sunk: false, horizontal: horizontal });
     return { board: board, ships: ships };
   }
 
@@ -1715,6 +2147,195 @@ window.SFX = (function () {
 </script>
 
 <!-- ============================================================ -->
+<!-- PARTICLE EFFECTS -->
+<!-- ============================================================ -->
+<script>
+window.Particles = (function () {
+  'use strict';
+
+  var canvas = document.createElement('canvas');
+  canvas.id = 'particle-canvas';
+  document.body.appendChild(canvas);
+  var ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var POOL_SIZE = 500;
+  var pool = new Array(POOL_SIZE);
+  var activeCount = 0;
+  var animating = false;
+
+  for (var i = 0; i < POOL_SIZE; i++) {
+    pool[i] = {
+      active: false, x: 0, y: 0, vx: 0, vy: 0,
+      life: 0, maxLife: 0, size: 0, sizeEnd: 0,
+      color: '', alpha: 1, type: 'circle',
+      ringRadius: 0, ringMaxRadius: 0, gravity: 0
+    };
+  }
+
+  function acquire() {
+    if (activeCount >= POOL_SIZE) return null;
+    for (var i = 0; i < POOL_SIZE; i++) {
+      if (!pool[i].active) { pool[i].active = true; activeCount++; return pool[i]; }
+    }
+    return null;
+  }
+
+  function release(p) { p.active = false; activeCount--; }
+
+  var lastTime = 0;
+
+  function loop(timestamp) {
+    if (activeCount <= 0) { animating = false; ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
+    var dt = lastTime ? Math.min((timestamp - lastTime) / 1000, 0.05) : 0.016;
+    lastTime = timestamp;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (var i = 0; i < POOL_SIZE; i++) {
+      var p = pool[i];
+      if (!p.active) continue;
+      p.life -= dt;
+      if (p.life <= 0) { release(p); continue; }
+      var progress = 1 - (p.life / p.maxLife);
+      p.vy += p.gravity * dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.alpha = p.life / p.maxLife;
+
+      if (p.type === 'ring') {
+        var radius = p.ringRadius + (p.ringMaxRadius - p.ringRadius) * progress;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = p.color;
+        ctx.globalAlpha = p.alpha * 0.6;
+        ctx.lineWidth = 2 * (1 - progress);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      } else {
+        var size = p.size + (p.sizeEnd - p.size) * progress;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(size, 0.5), 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function ensureAnimating() {
+    if (!animating) { animating = true; lastTime = 0; requestAnimationFrame(loop); }
+  }
+
+  var shakeTimer = null;
+
+  function screenShake(duration, intensity) {
+    var container = document.querySelector('.game-container');
+    if (!container) return;
+    var start = performance.now();
+    function shake(now) {
+      var elapsed = now - start;
+      if (elapsed > duration) { container.style.transform = ''; return; }
+      var decay = 1 - (elapsed / duration);
+      var ox = (Math.random() * 2 - 1) * intensity * decay;
+      var oy = (Math.random() * 2 - 1) * intensity * decay;
+      container.style.transform = 'translate(' + ox + 'px, ' + oy + 'px)';
+      requestAnimationFrame(shake);
+    }
+    if (shakeTimer) cancelAnimationFrame(shakeTimer);
+    shakeTimer = requestAnimationFrame(shake);
+  }
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+
+  function splash(x, y) {
+    var colors = ['#4fc3f7', '#e1f5fe', '#ffffff'];
+    for (var i = 0; i < 18; i++) {
+      var p = acquire(); if (!p) break;
+      var angle = -Math.PI / 2 + rand(-0.8, 0.8);
+      var speed = rand(80, 220);
+      p.x = x + rand(-4, 4); p.y = y;
+      p.vx = Math.cos(angle) * speed; p.vy = Math.sin(angle) * speed;
+      p.gravity = 350; p.life = rand(0.4, 0.9); p.maxLife = p.life;
+      p.size = rand(2, 5); p.sizeEnd = 0.5;
+      p.color = colors[Math.floor(Math.random() * colors.length)]; p.type = 'circle';
+    }
+    var ring = acquire();
+    if (ring) {
+      ring.x = x; ring.y = y; ring.vx = 0; ring.vy = 0; ring.gravity = 0;
+      ring.life = 0.6; ring.maxLife = 0.6; ring.size = 0; ring.sizeEnd = 0;
+      ring.color = '#4fc3f7'; ring.type = 'ring'; ring.ringRadius = 3; ring.ringMaxRadius = 30;
+    }
+    ensureAnimating();
+  }
+
+  function fire(x, y) {
+    var colors = ['#ff6d00', '#ff3d00', '#ffab00'];
+    for (var f = 0; f < 4; f++) {
+      var fp = acquire(); if (!fp) break;
+      fp.x = x + rand(-3, 3); fp.y = y + rand(-3, 3);
+      fp.vx = rand(-20, 20); fp.vy = rand(-30, -10); fp.gravity = 0;
+      fp.life = rand(0.15, 0.3); fp.maxLife = fp.life;
+      fp.size = rand(6, 10); fp.sizeEnd = 1;
+      fp.color = f < 2 ? '#ffffff' : '#fff59d'; fp.type = 'circle';
+    }
+    for (var i = 0; i < 22; i++) {
+      var p = acquire(); if (!p) break;
+      var angle = -Math.PI / 2 + rand(-1.0, 1.0);
+      var speed = rand(40, 160);
+      p.x = x + rand(-6, 6); p.y = y + rand(-4, 4);
+      p.vx = Math.cos(angle) * speed; p.vy = Math.sin(angle) * speed;
+      p.gravity = -20; p.life = rand(0.5, 1.2); p.maxLife = p.life;
+      p.size = rand(2, 5); p.sizeEnd = 0.5;
+      p.color = colors[Math.floor(Math.random() * colors.length)]; p.type = 'circle';
+    }
+    ensureAnimating();
+  }
+
+  function explode(x, y) {
+    var burstColors = ['#ff1744', '#ff6d00', '#ffd600', '#ff3d00', '#ffab00'];
+    var smokeColors = ['#616161', '#757575', '#9e9e9e', '#bdbdbd'];
+    for (var f = 0; f < 5; f++) {
+      var fp = acquire(); if (!fp) break;
+      fp.x = x + rand(-4, 4); fp.y = y + rand(-4, 4);
+      fp.vx = rand(-15, 15); fp.vy = rand(-15, 15); fp.gravity = 0;
+      fp.life = rand(0.1, 0.25); fp.maxLife = fp.life;
+      fp.size = rand(10, 16); fp.sizeEnd = 2; fp.color = '#ffffff'; fp.type = 'circle';
+    }
+    for (var i = 0; i < 40; i++) {
+      var p = acquire(); if (!p) break;
+      var angle = Math.random() * Math.PI * 2;
+      var speed = rand(80, 300);
+      p.x = x + rand(-6, 6); p.y = y + rand(-6, 6);
+      p.vx = Math.cos(angle) * speed; p.vy = Math.sin(angle) * speed;
+      p.gravity = 150; p.life = rand(0.6, 1.4); p.maxLife = p.life;
+      p.size = rand(3, 7); p.sizeEnd = 0.5;
+      p.color = burstColors[Math.floor(Math.random() * burstColors.length)]; p.type = 'circle';
+    }
+    for (var s = 0; s < 12; s++) {
+      var sp = acquire(); if (!sp) break;
+      sp.x = x + rand(-10, 10); sp.y = y + rand(-10, 10);
+      sp.vx = rand(-25, 25); sp.vy = rand(-60, -20); sp.gravity = -10;
+      sp.life = rand(1.0, 2.0); sp.maxLife = sp.life;
+      sp.size = rand(6, 12); sp.sizeEnd = rand(14, 22);
+      sp.color = smokeColors[Math.floor(Math.random() * smokeColors.length)]; sp.type = 'circle';
+    }
+    screenShake(300, 8);
+    ensureAnimating();
+  }
+
+  return { splash: splash, fire: fire, explode: explode };
+})();
+</script>
+
+<!-- ============================================================ -->
 <!-- GLUE CODE — Wires Engine + AI + SFX + UI together -->
 <!-- ============================================================ -->
 <script>
@@ -1760,6 +2381,11 @@ window.SFX = (function () {
   ];
   var currentShipIndex = 0;
   var placedShips = {};
+
+  // Keyboard navigation state
+  var kbRow = 0, kbCol = 0;
+  var kbMode = false;
+  var kbFiring = false;
 
   // ----- Build grids programmatically -----
   function buildGrid(gridEl) {
@@ -1817,6 +2443,24 @@ window.SFX = (function () {
       cells.push({ row: horiz ? row : row + i, col: horiz ? col + i : col });
     }
     return cells;
+  }
+
+  function applyShipClasses(grid, ship) {
+    var orient = ship.horizontal ? 'h' : 'v';
+    var typeName = ship.name.toLowerCase();
+    for (var i = 0; i < ship.positions.length; i++) {
+      var pos = ship.positions[i];
+      var el = getCell(grid, pos.row, pos.col);
+      if (!el) continue;
+      el.classList.add('ship', 'ship-' + typeName);
+      if (i === 0) {
+        el.classList.add('ship-bow-' + orient);
+      } else if (i === ship.positions.length - 1) {
+        el.classList.add('ship-stern-' + orient);
+      } else {
+        el.classList.add('ship-hull-' + orient);
+      }
+    }
   }
 
   // ----- Sound -----
@@ -1964,11 +2608,7 @@ window.SFX = (function () {
         if (result === null) return;
         clearPreview();
         SFX.place();
-        var cells = getShipCells(def.size, row, col, horizontal);
-        for (var c = 0; c < cells.length; c++) {
-          var el = getCell(playerGrid, cells[c].row, cells[c].col);
-          if (el) el.classList.add('ship');
-        }
+        applyShipClasses(playerGrid, playerShips[playerShips.length - 1]);
         placedShips[def.key] = true;
         markShipPlaced(currentShipIndex);
         var foundNext = false;
@@ -1986,16 +2626,91 @@ window.SFX = (function () {
     })(pCells[pi]);
   }
 
+  // ----- Undo ship placement (right-click) -----
+  playerGrid.addEventListener('contextmenu', function (e) {
+    if (phase !== 'placement') return;
+    e.preventDefault();
+    var target = e.target;
+    if (!target.classList.contains('cell')) return;
+    var row = parseInt(target.getAttribute('data-row'), 10);
+    var col = parseInt(target.getAttribute('data-col'), 10);
+    if (playerBoard[row][col] !== 'ship') return;
+
+    var ship = Engine.getShipAt(playerShips, row, col);
+    if (!ship) return;
+
+    for (var i = 0; i < ship.positions.length; i++) {
+      var pos = ship.positions[i];
+      playerBoard[pos.row][pos.col] = null;
+      var cell = getCell(playerGrid, pos.row, pos.col);
+      if (cell) cell.classList.remove('ship', 'ship-bow-h', 'ship-bow-v', 'ship-hull-h', 'ship-hull-v', 'ship-stern-h', 'ship-stern-v', 'ship-carrier', 'ship-battleship', 'ship-cruiser', 'ship-submarine', 'ship-destroyer');
+    }
+
+    var shipIdx = playerShips.indexOf(ship);
+    if (shipIdx !== -1) playerShips.splice(shipIdx, 1);
+
+    for (var d = 0; d < shipDefs.length; d++) {
+      if (shipDefs[d].name === ship.name) {
+        placedShips[shipDefs[d].key] = false;
+        shipOptions[d].classList.remove('placed');
+        currentShipIndex = d;
+        selectShipOption(d);
+        setStatus('Place your ' + shipDefs[d].name + ' (' + shipDefs[d].size + ' cells)');
+        break;
+      }
+    }
+    clearPreview();
+  });
+
   // ----- Rotate -----
   rotateBtn.addEventListener('click', function () {
     horizontal = !horizontal;
     rotateBtn.textContent = horizontal ? 'Rotate (R)' : 'Rotate (R) \u2014 Vertical';
   });
 
+  // ----- Keyboard navigation helpers -----
+  function updateCursor() {
+    var prev = enemyGrid.querySelector('.kb-cursor');
+    if (prev) prev.classList.remove('kb-cursor');
+    if (!kbMode || phase !== 'battle') return;
+    var cell = getCell(enemyGrid, kbRow, kbCol);
+    if (cell) cell.classList.add('kb-cursor');
+  }
+
+  function moveCursor(dr, dc) {
+    var r = kbRow + dr;
+    var c = kbCol + dc;
+    while (r >= 0 && r < 10 && c >= 0 && c < 10) {
+      if (enemyBoard[r][c] !== 'hit' && enemyBoard[r][c] !== 'miss') {
+        kbRow = r; kbCol = c; updateCursor(); return;
+      }
+      r += dr; c += dc;
+    }
+  }
+
+  function fireAtCursor() {
+    var cell = getCell(enemyGrid, kbRow, kbCol);
+    if (cell) { kbFiring = true; cell.click(); kbFiring = false; }
+  }
+
   document.addEventListener('keydown', function (e) {
     if ((e.key === 'r' || e.key === 'R') && phase === 'placement') {
       horizontal = !horizontal;
       rotateBtn.textContent = horizontal ? 'Rotate (R)' : 'Rotate (R) \u2014 Vertical';
+    }
+
+    if (phase === 'battle' && !locked) {
+      if (e.key === 'Tab') {
+        e.preventDefault(); kbMode = !kbMode; updateCursor();
+      } else if (e.key === 'Escape') {
+        kbMode = false; updateCursor();
+      } else if (kbMode) {
+        if (e.key === 'ArrowUp') { e.preventDefault(); moveCursor(-1, 0); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); moveCursor(1, 0); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); moveCursor(0, -1); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); moveCursor(0, 1); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fireAtCursor(); }
+      }
     }
   });
 
@@ -2009,7 +2724,9 @@ window.SFX = (function () {
     placedShips = {};
     // Clear visual
     var allCells = playerGrid.querySelectorAll('.cell');
-    for (var i = 0; i < allCells.length; i++) allCells[i].classList.remove('ship');
+    for (var i = 0; i < allCells.length; i++) {
+      allCells[i].classList.remove('ship', 'ship-bow-h', 'ship-bow-v', 'ship-hull-h', 'ship-hull-v', 'ship-stern-h', 'ship-stern-v', 'ship-carrier', 'ship-battleship', 'ship-cruiser', 'ship-submarine', 'ship-destroyer');
+    }
     // Random place
     var result = Engine.randomPlacement();
     playerBoard = result.board;
@@ -2017,10 +2734,10 @@ window.SFX = (function () {
     // Show ships
     for (var s = 0; s < playerShips.length; s++) {
       var ship = playerShips[s];
-      for (var p = 0; p < ship.positions.length; p++) {
-        var el = getCell(playerGrid, ship.positions[p].row, ship.positions[p].col);
-        if (el) el.classList.add('ship');
+      if (typeof ship.horizontal === 'undefined') {
+        ship.horizontal = ship.positions.length <= 1 || ship.positions[0].row === ship.positions[1].row;
       }
+      applyShipClasses(playerGrid, ship);
       // Mark option as placed
       for (var d = 0; d < shipDefs.length; d++) {
         if (shipDefs[d].name === ship.name) { placedShips[shipDefs[d].key] = true; markShipPlaced(d); break; }
@@ -2044,6 +2761,12 @@ window.SFX = (function () {
     playerHitCount = 0;
     enemyShotCount = 0;
 
+    Stats.load();
+    Stats.resetCurrentScore();
+    updateScoreDisplay();
+    updateStatsPanel();
+    document.getElementById('live-score').style.display = '';
+
     buildFleetStatus(playerFleetList, playerShips, false);
     buildFleetStatus(enemyFleetList, enemyShips, true);
 
@@ -2062,6 +2785,7 @@ window.SFX = (function () {
       });
       cell.addEventListener('click', function () {
         if (phase !== 'battle' || locked) return;
+        if (kbMode && !kbFiring) { kbMode = false; updateCursor(); }
         var row = parseInt(cell.getAttribute('data-row'), 10);
         var col = parseInt(cell.getAttribute('data-col'), 10);
         if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) return;
@@ -2082,18 +2806,32 @@ window.SFX = (function () {
               if (sunkCell) { sunkCell.classList.remove('hit', 'miss'); sunkCell.classList.add('sunk'); }
             }
           }
+          var _rect = cell.getBoundingClientRect();
+          Particles.explode(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
           playerHitCount++;
+          Stats.scoreHit();
+          var sunkShipForScore = Engine.getShipAt(enemyShips, row, col);
+          if (sunkShipForScore) Stats.scoreSink(sunkShipForScore.positions.length);
+          updateScoreDisplay();
           setStatus("You sunk their " + shot.shipName + "!", 'sunk');
           addLog('You fired ' + coord + ' \u2014 SUNK ' + shot.shipName + '!', 'sunk');
         } else if (shot.result === 'hit') {
           SFX.hit();
           cell.classList.add('hit');
+          var _rect = cell.getBoundingClientRect();
+          Particles.fire(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
           playerHitCount++;
+          Stats.scoreHit();
+          updateScoreDisplay();
           setStatus("Hit at " + coord + "!", 'hit');
           addLog('You fired ' + coord + ' \u2014 HIT!', 'hit');
         } else {
           SFX.miss();
           cell.classList.add('miss');
+          var _rect = cell.getBoundingClientRect();
+          Particles.splash(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+          Stats.scoreMiss();
+          updateScoreDisplay();
           setStatus("Miss at " + coord, 'miss');
           addLog('You fired ' + coord + ' \u2014 miss', 'miss');
         }
@@ -2130,16 +2868,28 @@ window.SFX = (function () {
           if (sunkCell) { sunkCell.classList.remove('ship', 'hit', 'miss'); sunkCell.classList.add('sunk'); }
         }
       }
+      if (cell) {
+        var _rect = cell.getBoundingClientRect();
+        Particles.explode(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      }
       setStatus("Enemy sunk your " + shot.shipName + "!", 'sunk');
       addLog('Enemy fired ' + coord + ' \u2014 SUNK your ' + shot.shipName + '!', 'sunk');
     } else if (shot.result === 'hit') {
       SFX.hit();
       if (cell) { cell.classList.remove('ship'); cell.classList.add('hit'); }
+      if (cell) {
+        var _rect = cell.getBoundingClientRect();
+        Particles.fire(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      }
       setStatus("Enemy hit your " + shot.shipName + "!", 'hit');
       addLog('Enemy fired ' + coord + ' \u2014 HIT your ' + shot.shipName + '!', 'hit');
     } else {
       SFX.miss();
       if (cell) cell.classList.add('miss');
+      if (cell) {
+        var _rect = cell.getBoundingClientRect();
+        Particles.splash(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      }
       setStatus("Enemy missed at " + coord, 'miss');
       addLog('Enemy fired ' + coord + ' \u2014 miss', 'miss');
     }
@@ -2174,12 +2924,16 @@ window.SFX = (function () {
     }
 
     var accuracy = playerShotCount > 0 ? Math.round((playerHitCount / playerShotCount) * 100) : 0;
+    var finalScore = Stats.scoreGameEnd(playerWon, accuracy, turnNumber);
+    Stats.recordGame(playerWon, accuracy, playerShotCount, playerHitCount);
+    updateStatsPanel();
     var enemySunk = 0;
     for (var i = 0; i < enemyShips.length; i++) { if (enemyShips[i].sunk) enemySunk++; }
     var playerSunk = 0;
     for (var j = 0; j < playerShips.length; j++) { if (playerShips[j].sunk) playerSunk++; }
 
     overStats.innerHTML =
+      '<div class="stat-row"><span class="stat-label">Score</span><span class="stat-value" style="color:var(--signal-gold)">' + finalScore.toLocaleString() + '</span></div>' +
       '<div class="stat-row"><span class="stat-label">Turns</span><span class="stat-value">' + turnNumber + '</span></div>' +
       '<div class="stat-row"><span class="stat-label">Your Shots</span><span class="stat-value">' + playerShotCount + '</span></div>' +
       '<div class="stat-row"><span class="stat-label">Accuracy</span><span class="stat-value">' + accuracy + '%</span></div>' +
@@ -2188,7 +2942,62 @@ window.SFX = (function () {
       '<div class="stat-row"><span class="stat-label">Difficulty</span><span class="stat-value">' + difficultySelect.value.charAt(0).toUpperCase() + difficultySelect.value.slice(1) + '</span></div>';
 
     overlay.classList.add('visible');
+
+    // Reveal un-hit enemy ship positions
+    for (var s = 0; s < enemyShips.length; s++) {
+      var ship = enemyShips[s];
+      for (var p = 0; p < ship.positions.length; p++) {
+        var pos = ship.positions[p];
+        if (enemyBoard[pos.row][pos.col] === 'ship') {
+          var revealCell = getCell(enemyGrid, pos.row, pos.col);
+          if (revealCell) revealCell.classList.add('revealed');
+        }
+      }
+    }
   }
+
+  // ----- Stats UI helpers -----
+  function updateScoreDisplay() {
+    var el = document.getElementById('score-value');
+    var container = document.getElementById('live-score');
+    if (el) {
+      el.textContent = Stats.getCurrentScore().toLocaleString();
+      container.classList.remove('score-flash');
+      void container.offsetWidth;
+      container.classList.add('score-flash');
+    }
+  }
+
+  function updateStatsPanel() {
+    var s = Stats.getStats();
+    var winRate = s.games_played > 0 ? Math.round((s.wins / s.games_played) * 100) : 0;
+    document.getElementById('stat-games-played').textContent = s.games_played;
+    document.getElementById('stat-win-rate').textContent = winRate + '%';
+    document.getElementById('stat-best-accuracy').textContent = s.best_accuracy + '%';
+    document.getElementById('stat-win-streak').textContent = s.best_win_streak;
+    document.getElementById('stat-highest-score').textContent = s.highest_score.toLocaleString();
+  }
+
+  // Stats panel toggle
+  document.getElementById('stats-panel-header').addEventListener('click', function () {
+    var body = document.getElementById('stats-panel-body');
+    var arrow = this.querySelector('.stats-toggle-arrow');
+    var isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : '';
+    arrow.textContent = isOpen ? '\u25B6' : '\u25BC';
+  });
+
+  // Reset stats button
+  document.getElementById('reset-stats-btn').addEventListener('click', function () {
+    if (confirm('Reset all career statistics? This cannot be undone.')) {
+      Stats.reset();
+      updateStatsPanel();
+    }
+  });
+
+  // Load stats on page load
+  Stats.load();
+  updateStatsPanel();
 
   playAgainBtn.addEventListener('click', function () { location.reload(); });
 
