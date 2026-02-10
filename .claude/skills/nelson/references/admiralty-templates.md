@@ -9,4 +9,5 @@ Consult the specific template for the current workflow step.
 | Captain crews a ship | `admiralty-templates/ship-manifest.md` |
 | Run Quarterdeck Rhythm | `admiralty-templates/quarterdeck-report.md` |
 | Set Action Stations (red-cell review) | `admiralty-templates/red-cell-review.md` |
+| Spawn teammate | `admiralty-templates/crew-briefing.md` |
 | Stand Down And Log Action | `admiralty-templates/captains-log.md` |
