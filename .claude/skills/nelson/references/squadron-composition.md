@@ -35,7 +35,4 @@ Choose the first condition that matches.
 
 ## Anti-Patterns
 
-- Creating teams for work that is mostly linear.
-- Splitting one file across multiple captains.
-- Letting red cell become a ticket queue.
-- Adding agents without reducing critical path length.
+See `references/standing-orders.md` for the full list of standing orders and known anti-patterns.

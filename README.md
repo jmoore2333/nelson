@@ -191,8 +191,30 @@ The skill includes structured templates for consistent output across missions:
 │   └── openai.yaml                           # OpenAI agent interface definition
 └── references/
     ├── action-stations.md                    # Risk tier definitions and controls
-    ├── admiralty-templates.md                # Reusable templates for all phases
-    └── squadron-composition.md              # Mode selection and team sizing rules
+    ├── admiralty-templates.md                # Template routing index
+    ├── admiralty-templates/                  # Individual template files
+    │   ├── battle-plan.md
+    │   ├── captains-log.md
+    │   ├── quarterdeck-report.md
+    │   ├── red-cell-review.md
+    │   └── sailing-orders.md
+    ├── damage-control.md                     # Error recovery routing index
+    ├── damage-control/                       # Individual procedure files
+    │   ├── escalation.md
+    │   ├── man-overboard.md
+    │   ├── partial-rollback.md
+    │   ├── scuttle-and-reform.md
+    │   └── session-resumption.md
+    ├── squadron-composition.md              # Mode selection and team sizing rules
+    ├── standing-orders.md                    # Anti-pattern routing index
+    └── standing-orders/                      # Individual anti-pattern files
+        ├── admiral-at-the-helm.md
+        ├── becalmed-fleet.md
+        ├── crew-without-canvas.md
+        ├── drifting-anchorage.md
+        ├── press-ganged-navigator.md
+        ├── split-keel.md
+        └── unclassified-engagement.md
 ```
 
 - `SKILL.md` is the entrypoint that Claude reads when the skill is invoked. It defines the six-step workflow and references the supporting files.
@@ -202,7 +224,7 @@ The skill includes structured templates for consistent output across missions:
 
 ### Modify templates
 
-Edit the templates in `references/admiralty-templates.md` to match your team's reporting style. The templates use plain text format — adjust fields, add sections, or remove what you don't need.
+Edit the individual template files in `references/admiralty-templates/` to match your team's reporting style. The templates use plain text format — adjust fields, add sections, or remove what you don't need.
 
 ### Adjust risk tiers
 

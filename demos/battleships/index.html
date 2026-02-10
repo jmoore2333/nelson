@@ -5,1109 +5,1752 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battleships</title>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+/* ============================================================
+   BATTLESHIPS — Premium Naval Warfare CSS Visual System
+   ============================================================ */
 
-    body {
-      background: #0d1b2a;
-      color: #e0e1dd;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+/* -- Custom Properties (Color Palette & Design Tokens) -- */
+:root {
+  /* Ocean depths */
+  --ocean-abyss: #060e18;
+  --ocean-deep: #0a1628;
+  --ocean-dark: #0d1b2a;
+  --ocean-mid: #1b2838;
+  --ocean-surface: #1e3a5f;
+  --ocean-light: #24506e;
+  --ocean-foam: #2c6e8a;
 
-    header {
-      width: 100%;
-      text-align: center;
-      padding: 1.2rem 1rem 0.6rem;
-      background: linear-gradient(180deg, #1b2838 0%, #0d1b2a 100%);
-      border-bottom: 2px solid #2c3e50;
-    }
+  /* Steel & chrome */
+  --steel-dark: #2c3e50;
+  --steel-mid: #34495e;
+  --steel-light: #4a6fa5;
+  --steel-bright: #5a8abf;
+  --steel-chrome: #778da9;
 
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #e0e1dd;
-      text-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
-    }
+  /* Signal colors */
+  --signal-green: #2ecc71;
+  --signal-green-dark: #27ae60;
+  --signal-green-glow: rgba(46, 204, 113, 0.4);
+  --signal-red: #e74c3c;
+  --signal-red-dark: #c0392b;
+  --signal-red-glow: rgba(231, 76, 60, 0.4);
+  --signal-amber: #f39c12;
+  --signal-amber-dark: #e67e22;
+  --signal-amber-glow: rgba(243, 156, 18, 0.4);
+  --signal-gold: #f1c40f;
 
-    #status-message {
-      margin: 0.8rem auto;
-      padding: 0.6rem 1.4rem;
-      font-size: 1.05rem;
-      text-align: center;
-      color: #a8dadc;
-      background: rgba(30, 58, 95, 0.5);
-      border: 1px solid #2c3e50;
-      border-radius: 4px;
-      max-width: 600px;
-      min-height: 2.4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.3s, background 0.3s;
-    }
+  /* Text */
+  --text-primary: #e0e1dd;
+  --text-secondary: #a8dadc;
+  --text-muted: #778da9;
+  --text-dim: #4a6078;
 
-    /* -- Placement Panel -- */
-    #placement-panel {
-      margin: 0.6rem auto;
-      padding: 0.8rem 1.2rem;
-      background: #1b2838;
-      border: 1px solid #2c3e50;
-      border-radius: 6px;
-      max-width: 720px;
-      width: 90%;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.8rem;
-      transition: opacity 0.4s, max-height 0.4s;
-    }
+  /* Glass */
+  --glass-bg: rgba(27, 40, 56, 0.65);
+  --glass-border: rgba(74, 111, 165, 0.3);
+  --glass-highlight: rgba(255, 255, 255, 0.05);
+  --glass-blur: 12px;
 
-    #placement-panel.hidden {
-      opacity: 0;
-      max-height: 0;
-      overflow: hidden;
-      padding: 0;
-      margin: 0;
-      border: none;
-    }
+  /* Grid */
+  --cell-size: 40px;
+  --label-size: 28px;
+  --grid-gap: 0px;
+  --grid-cols: 10;
+  --board-radius: 8px;
 
-    #placement-panel h3 {
-      width: 100%;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #778da9;
-      margin-bottom: 0.2rem;
-    }
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-mid: 0.3s ease;
+  --transition-slow: 0.5s ease;
 
-    .ship-option {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.35rem 0.7rem;
-      background: #1e3a5f;
-      border: 1px solid #34495e;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      color: #e0e1dd;
-      cursor: default;
-      transition: background 0.2s, border-color 0.2s;
-    }
+  /* Shadows */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-heavy: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow-green: 0 0 20px rgba(46, 204, 113, 0.3);
+  --shadow-glow-red: 0 0 20px rgba(231, 76, 60, 0.3);
+  --shadow-glow-blue: 0 0 20px rgba(74, 111, 165, 0.3);
+}
 
-    .ship-option.active {
-      background: #2ecc71;
-      color: #0d1b2a;
-      border-color: #27ae60;
-      font-weight: 600;
-    }
+/* -- Reset & Base -- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    .ship-option.placed {
-      opacity: 0.4;
-      text-decoration: line-through;
-    }
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-    .ship-option .ship-size {
-      font-weight: 700;
-      margin-left: 0.2rem;
-    }
+body {
+  background: var(--ocean-abyss);
+  color: var(--text-primary);
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
+}
 
-    #rotate-btn {
-      padding: 0.4rem 0.9rem;
-      background: #2c3e50;
-      color: #e0e1dd;
-      border: 1px solid #4a6fa5;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-    }
+/* -- Animated Ocean Background -- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(30, 58, 95, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(44, 110, 138, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(10, 22, 40, 0.8) 0%, transparent 60%),
+    linear-gradient(180deg, var(--ocean-abyss) 0%, var(--ocean-dark) 40%, var(--ocean-deep) 100%);
+}
 
-    #rotate-btn:hover {
-      background: #4a6fa5;
-    }
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(46, 204, 113, 0.008) 25%,
+      transparent 50%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0%,
+      rgba(74, 111, 165, 0.012) 33%,
+      transparent 66%
+    );
+  background-size: 200px 200px, 150px 150px;
+  animation: waveMotion 12s ease-in-out infinite;
+}
 
-    #rotate-btn:active {
-      transform: scale(0.95);
-    }
+/* Scanline overlay */
+.game-container::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+}
 
-    .placement-instructions {
-      width: 100%;
-      font-size: 0.78rem;
-      color: #778da9;
-      font-style: italic;
-    }
+/* -- Keyframe Animations -- */
+@keyframes waveMotion {
+  0%   { background-position: 0px 0px, 0px 0px; }
+  25%  { background-position: 50px 25px, -30px 15px; }
+  50%  { background-position: 100px 0px, -60px 30px; }
+  75%  { background-position: 50px -25px, -30px 45px; }
+  100% { background-position: 0px 0px, 0px 0px; }
+}
 
-    /* -- Boards Area -- */
-    .boards-container {
-      display: flex;
-      gap: 2.5rem;
-      padding: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+@keyframes hitFlash {
+  0%   { background: #ffffff; box-shadow: inset 0 0 20px rgba(255,255,255,0.9), 0 0 30px rgba(243,156,18,0.6); }
+  30%  { background: var(--signal-amber); box-shadow: inset 0 0 15px rgba(243,156,18,0.6), 0 0 20px rgba(231,76,60,0.4); }
+  100% { background: var(--signal-red); box-shadow: inset 0 0 8px rgba(231,76,60,0.3); }
+}
 
-    .board-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+@keyframes missRipple {
+  0%   { box-shadow: inset 0 0 0 0 rgba(236,240,241,0.5); }
+  40%  { box-shadow: inset 0 0 0 12px rgba(236,240,241,0.15); }
+  100% { box-shadow: inset 0 0 0 20px rgba(236,240,241,0); }
+}
 
-    .board-section h2 {
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #778da9;
-      margin-bottom: 0.5rem;
-    }
+@keyframes sunkShake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-3px) rotate(-0.5deg); }
+  20% { transform: translateX(3px) rotate(0.5deg); }
+  30% { transform: translateX(-3px) rotate(-0.5deg); }
+  40% { transform: translateX(3px) rotate(0.5deg); }
+  50% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+  70% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
 
-    .board-wrapper {
-      display: inline-grid;
-      gap: 0;
-    }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-    /* Grid: 11 cols (corner + A-J), 11 rows (corner + 1-10) */
-    .grid {
-      display: grid;
-      grid-template-columns: 28px repeat(10, 40px);
-      grid-template-rows: 28px repeat(10, 40px);
-    }
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
 
-    .label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #778da9;
-      user-select: none;
-    }
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 5px var(--signal-green-glow), inset 0 0 5px var(--signal-green-glow); }
+  50%      { box-shadow: 0 0 15px var(--signal-green-glow), inset 0 0 10px var(--signal-green-glow); }
+}
 
-    .label.corner {
-      /* top-left empty corner */
-    }
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
 
-    /* -- Cells -- */
-    .cell {
-      width: 40px;
-      height: 40px;
-      background: #1e3a5f;
-      border: 1px solid #2c3e50;
-      position: relative;
-      cursor: default;
-      transition: background 0.2s, box-shadow 0.2s;
-    }
+@keyframes floatIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 
-    /* Enemy grid hover */
-    #enemy-grid .cell:hover {
-      background: #24506e;
-      box-shadow: inset 0 0 8px rgba(46, 204, 113, 0.35);
-      cursor: crosshair;
-    }
+@keyframes cellWaterShimmer {
+  0%, 100% { background-position: 0% 0%; }
+  50%      { background-position: 100% 100%; }
+}
 
-    #enemy-grid .cell.hit:hover,
-    #enemy-grid .cell.miss:hover,
-    #enemy-grid .cell.sunk:hover {
-      cursor: default;
-      box-shadow: none;
-    }
+@keyframes explosionExpand {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
 
-    /* Ship on player board */
-    .cell.ship {
-      background: #4a6fa5;
-    }
+@keyframes victoryShine {
+  0%   { filter: hue-rotate(0deg) brightness(1); }
+  50%  { filter: hue-rotate(10deg) brightness(1.2); }
+  100% { filter: hue-rotate(0deg) brightness(1); }
+}
 
-    /* Hit */
-    .cell.hit {
-      background: #e74c3c;
-      animation: hitFlash 0.4s ease-out;
-    }
+/* -- Header -- */
+header {
+  width: 100%;
+  text-align: center;
+  padding: 1.4rem 1rem 0.8rem;
+  background: linear-gradient(180deg, rgba(27,40,56,0.9) 0%, rgba(13,27,42,0.95) 100%);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  position: relative;
+  z-index: 10;
+  animation: fadeIn 0.6s ease-out;
+}
 
-    .cell.hit::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 16px;
-      height: 16px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: radial-gradient(circle, #f39c12 30%, #e74c3c 70%, transparent 100%);
-      box-shadow: 0 0 6px 2px rgba(243, 156, 18, 0.5);
-    }
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--signal-green), transparent);
+  opacity: 0.4;
+}
 
-    @keyframes hitFlash {
-      0% { background: #fff; }
-      100% { background: #e74c3c; }
-    }
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-shadow: 0 0 30px rgba(46,204,113,0.25), 0 0 60px rgba(46,204,113,0.1);
+}
 
-    /* Miss */
-    .cell.miss {
-      background: #1e3a5f;
-    }
+header .subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
 
-    .cell.miss::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 10px;
-      height: 10px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: #ecf0f1;
-      opacity: 0.7;
-      box-shadow: 0 0 4px rgba(236, 240, 241, 0.4);
-    }
+/* -- Top Controls Row -- */
+.top-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 0.6rem auto;
+  padding: 0.5rem 1rem;
+  animation: fadeIn 0.5s ease-out 0.1s both;
+  flex-wrap: wrap;
+}
 
-    /* Sunk */
-    .cell.sunk {
-      background: #c0392b;
-    }
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-    .cell.sunk::after {
-      content: '\2715';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.8);
-    }
+.control-group label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
 
-    /* Placement preview */
-    .cell.preview-valid {
-      background: rgba(46, 204, 113, 0.4);
-      box-shadow: inset 0 0 6px rgba(46, 204, 113, 0.3);
-    }
+.control-group select {
+  padding: 0.35rem 0.8rem;
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: border-color var(--transition-mid), box-shadow var(--transition-mid);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23778da9' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+}
 
-    .cell.preview-invalid {
-      background: rgba(231, 76, 60, 0.4);
-      box-shadow: inset 0 0 6px rgba(231, 76, 60, 0.3);
-    }
+.control-group select:hover {
+  border-color: var(--steel-light);
+  box-shadow: 0 0 8px rgba(74,111,165,0.2);
+}
 
-    /* -- Game Over Overlay -- */
-    #game-over-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(13, 27, 42, 0.88);
-      z-index: 100;
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(4px);
-    }
+.control-group select:focus {
+  outline: none;
+  border-color: var(--signal-green);
+  box-shadow: 0 0 8px var(--signal-green-glow);
+}
 
-    #game-over-overlay.visible {
-      display: flex;
-    }
+.sound-toggle {
+  padding: 0.35rem 0.7rem;
+  background: var(--glass-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-mid);
+  font-family: inherit;
+}
 
-    .game-over-box {
-      text-align: center;
-      padding: 2.5rem 3rem;
-      background: #1b2838;
-      border: 2px solid #4a6fa5;
-      border-radius: 10px;
-      box-shadow: 0 0 40px rgba(74, 111, 165, 0.3);
-    }
+.sound-toggle:hover {
+  border-color: var(--steel-light);
+  color: var(--text-primary);
+}
 
-    #game-over-message {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 1.2rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
+.sound-toggle.muted {
+  opacity: 0.5;
+}
 
-    #play-again-btn {
-      padding: 0.65rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #0d1b2a;
-      background: #2ecc71;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      transition: background 0.2s, transform 0.15s;
-    }
+/* -- Status Message Bar -- */
+#status-message {
+  margin: 0.6rem auto;
+  padding: 0.7rem 1.6rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  max-width: 620px;
+  width: 90%;
+  min-height: 2.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(var(--glass-blur));
+  transition: color var(--transition-mid), background var(--transition-mid), border-color var(--transition-mid);
+  animation: fadeIn 0.5s ease-out 0.15s both;
+  position: relative;
+  overflow: hidden;
+}
 
-    #play-again-btn:hover {
-      background: #27ae60;
-    }
+#status-message::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+}
 
-    #play-again-btn:active {
-      transform: scale(0.96);
-    }
+#status-message.status-hit  { color: var(--signal-red); border-color: var(--signal-red-glow); }
+#status-message.status-miss { color: var(--text-muted); }
+#status-message.status-sunk { color: var(--signal-amber); border-color: var(--signal-amber-glow); }
 
-    /* -- Responsive -- */
-    @media (max-width: 960px) {
-      .boards-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-      }
-    }
+/* -- Placement Panel -- */
+#placement-panel {
+  margin: 0.6rem auto;
+  padding: 1rem 1.4rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  max-width: 740px;
+  width: 92%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-subtle);
+  transition: opacity 0.5s ease, max-height 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+  animation: fadeIn 0.5s ease-out 0.2s both;
+  position: relative;
+}
+
+#placement-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+}
+
+#placement-panel.hidden {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: none;
+  pointer-events: none;
+}
+
+#placement-panel h3 {
+  width: 100%;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 0.2rem;
+  font-weight: 600;
+}
+
+.ship-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(30,58,95,0.6);
+  border: 1px solid var(--steel-dark);
+  border-radius: 5px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-mid);
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.ship-option::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 200%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  transition: left 0.5s ease;
+}
+
+.ship-option:hover::before { left: 100%; }
+.ship-option:hover { background: rgba(36,80,110,0.7); border-color: var(--steel-mid); }
+
+.ship-option.active {
+  background: linear-gradient(135deg, var(--signal-green-dark), var(--signal-green));
+  color: var(--ocean-abyss);
+  border-color: var(--signal-green);
+  font-weight: 700;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.ship-option.placed {
+  opacity: 0.35;
+  text-decoration: line-through;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+.ship-option .ship-size {
+  font-weight: 700;
+  margin-left: 0.15rem;
+  opacity: 0.8;
+}
+
+#rotate-btn,
+#auto-place-btn {
+  padding: 0.45rem 1rem;
+  background: rgba(44,62,80,0.7);
+  color: var(--text-primary);
+  border: 1px solid var(--steel-light);
+  border-radius: 5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-mid);
+  backdrop-filter: blur(4px);
+}
+
+#rotate-btn:hover,
+#auto-place-btn:hover {
+  background: var(--steel-light);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-glow-blue);
+}
+
+#rotate-btn:active,
+#auto-place-btn:active {
+  transform: scale(0.95);
+}
+
+.placement-instructions {
+  width: 100%;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* -- Boards Area -- */
+.boards-container {
+  display: flex;
+  gap: 3rem;
+  padding: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeIn 0.6s ease-out 0.3s both;
+}
+
+.board-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeInScale 0.5s ease-out both;
+}
+
+.board-section:first-child { animation-delay: 0.35s; }
+.board-section:last-child  { animation-delay: 0.45s; }
+
+.board-section h2 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 0.4rem;
+}
+
+.board-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--steel-light), transparent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: var(--label-size) repeat(10, var(--cell-size));
+  grid-template-rows: var(--label-size) repeat(10, var(--cell-size));
+  border-radius: var(--board-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-medium), 0 0 0 1px var(--glass-border);
+  position: relative;
+}
+
+.grid::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--board-radius);
+  box-shadow: inset 0 0 30px rgba(30,58,95,0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  user-select: none;
+  background: rgba(13,27,42,0.6);
+  letter-spacing: 0.05em;
+}
+
+.label.corner { background: rgba(13,27,42,0.8); }
+.label.col-header { border-bottom: 1px solid rgba(74,111,165,0.15); }
+.label.row-header { border-right: 1px solid rgba(74,111,165,0.15); }
+
+/* -- Cells -- */
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background: linear-gradient(135deg, rgba(30,58,95,0.9) 0%, rgba(24,50,82,0.9) 50%, rgba(30,58,95,0.95) 100%);
+  border: 1px solid rgba(44,62,80,0.5);
+  position: relative;
+  cursor: default;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  overflow: hidden;
+}
+
+.cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(74,111,165,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 70%, rgba(44,110,138,0.08) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: cellWaterShimmer 8s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.cell:nth-child(even)::before { animation-delay: -4s; }
+.cell:nth-child(3n)::before   { animation-duration: 10s; }
+
+/* Enemy grid hover */
+#enemy-grid .cell:not(.hit):not(.miss):not(.sunk):hover {
+  background: linear-gradient(135deg, rgba(36,80,110,0.9) 0%, rgba(30,70,100,0.9) 100%);
+  box-shadow: inset 0 0 12px var(--signal-green-glow), 0 0 6px var(--signal-green-glow);
+  border-color: rgba(46,204,113,0.3);
+  cursor: crosshair;
+  z-index: 2;
+}
+
+#enemy-grid .cell:not(.hit):not(.miss):not(.sunk):hover::after {
+  content: '+';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: rgba(46,204,113,0.6);
+  pointer-events: none;
+  z-index: 3;
+}
+
+#enemy-grid .cell.hit:hover,
+#enemy-grid .cell.miss:hover,
+#enemy-grid .cell.sunk:hover {
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Ship on player board */
+.cell.ship {
+  background: linear-gradient(145deg, #4a6fa5 0%, #3d5d8a 40%, #516f96 70%, #4a6fa5 100%);
+  border-color: rgba(90,138,191,0.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.15);
+}
+
+.cell.ship::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%), linear-gradient(315deg, rgba(0,0,0,0.1) 0%, transparent 50%);
+  animation: none;
+  opacity: 1;
+}
+
+/* Hit */
+.cell.hit {
+  background: radial-gradient(circle at center, var(--signal-amber) 0%, var(--signal-red) 60%, var(--signal-red-dark) 100%);
+  border-color: rgba(231,76,60,0.5);
+  animation: hitFlash 0.5s ease-out;
+  z-index: 2;
+}
+
+.cell.hit::before { animation: none; opacity: 0; }
+
+.cell.hit::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 18px; height: 18px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,200,50,0.9) 0%, rgba(243,156,18,0.7) 30%, rgba(231,76,60,0.5) 60%, transparent 100%);
+  box-shadow: 0 0 8px 3px rgba(243,156,18,0.5), 0 0 16px 6px rgba(231,76,60,0.2);
+  animation: explosionExpand 0.4s ease-out;
+  z-index: 3;
+}
+
+/* Miss */
+.cell.miss {
+  background: linear-gradient(135deg, rgba(30,58,95,0.8) 0%, rgba(24,45,72,0.9) 100%);
+  animation: missRipple 0.6s ease-out;
+}
+
+.cell.miss::before { animation: none; opacity: 0; }
+
+.cell.miss::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 10px; height: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(236,240,241,0.8) 0%, rgba(236,240,241,0.3) 50%, transparent 100%);
+  opacity: 0.7;
+  box-shadow: 0 0 4px rgba(236,240,241,0.3), 0 0 8px rgba(168,218,220,0.15);
+}
+
+/* Sunk */
+.cell.sunk {
+  background: linear-gradient(135deg, var(--signal-red-dark) 0%, #8b1a1a 50%, var(--signal-red-dark) 100%);
+  border-color: rgba(192,57,43,0.6);
+  animation: sunkShake 0.5s ease-out;
+}
+
+.cell.sunk::before { animation: none; opacity: 0; }
+
+.cell.sunk::after {
+  content: '\2715';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 0 6px rgba(192,57,43,0.6);
+  z-index: 3;
+}
+
+/* Placement preview */
+.cell.preview-valid {
+  background: rgba(46,204,113,0.3);
+  box-shadow: inset 0 0 10px rgba(46,204,113,0.25);
+  border-color: rgba(46,204,113,0.3);
+}
+
+.cell.preview-invalid {
+  background: rgba(231,76,60,0.3);
+  box-shadow: inset 0 0 10px rgba(231,76,60,0.25);
+  border-color: rgba(231,76,60,0.3);
+}
+
+/* -- Bottom Panels -- */
+.bottom-panels {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 1100px;
+  animation: fadeIn 0.6s ease-out 0.5s both;
+}
+
+/* -- Fleet Status Panel -- */
+.fleet-status {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-subtle);
+  min-width: 220px;
+  max-width: 300px;
+  flex: 1;
+  position: relative;
+}
+
+.fleet-status::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+}
+
+.fleet-status h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+  font-weight: 700;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(74,111,165,0.15);
+}
+
+.ship-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  transition: opacity var(--transition-mid);
+}
+
+.ship-status.sunk-status {
+  opacity: 0.4;
+  text-decoration: line-through;
+  color: var(--signal-red-dark);
+}
+
+.ship-status .ship-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.health-bar {
+  width: 50px;
+  height: 5px;
+  background: rgba(30,58,95,0.6);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.health-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--signal-green), var(--signal-green-dark));
+  transition: width 0.4s ease, background 0.4s ease;
+}
+
+.health-bar-fill.warning { background: linear-gradient(90deg, var(--signal-amber), var(--signal-amber-dark)); }
+.health-bar-fill.critical { background: linear-gradient(90deg, var(--signal-red), var(--signal-amber)); }
+.health-bar-fill.dead { width: 0 !important; }
+
+/* -- Combat Log Panel -- */
+.combat-log {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-subtle);
+  min-width: 280px;
+  max-width: 400px;
+  max-height: 260px;
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.combat-log::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+}
+
+.combat-log h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+  font-weight: 700;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(74,111,165,0.15);
+  flex-shrink: 0;
+}
+
+.log-entries {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-dark) transparent;
+}
+
+.log-entries::-webkit-scrollbar { width: 5px; }
+.log-entries::-webkit-scrollbar-track { background: transparent; }
+.log-entries::-webkit-scrollbar-thumb { background: var(--steel-dark); border-radius: 3px; }
+
+.log-entry {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  border-left: 2px solid transparent;
+  animation: floatIn 0.3s ease-out;
+  line-height: 1.4;
+}
+
+.log-entry.hit {
+  color: #f5a0a0;
+  background: rgba(231,76,60,0.08);
+  border-left-color: var(--signal-red);
+}
+
+.log-entry.miss {
+  color: var(--text-dim);
+  background: rgba(119,141,169,0.05);
+  border-left-color: var(--steel-dark);
+}
+
+.log-entry.sunk {
+  color: var(--signal-amber);
+  background: rgba(243,156,18,0.1);
+  border-left-color: var(--signal-amber);
+  font-weight: 600;
+}
+
+.log-entry .turn-number {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-right: 0.4rem;
+  font-weight: 600;
+}
+
+/* -- Game Over Overlay -- */
+#game-over-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(6,14,24,0.85);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+}
+
+#game-over-overlay.visible {
+  display: flex;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.game-over-box {
+  text-align: center;
+  padding: 3rem 3.5rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-heavy), 0 0 60px rgba(74,111,165,0.15);
+  backdrop-filter: blur(16px);
+  animation: fadeInScale 0.5s ease-out;
+  max-width: 440px;
+  width: 90%;
+  position: relative;
+  overflow: hidden;
+}
+
+.game-over-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+}
+
+#game-over-message {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.game-over-box.victory #game-over-message {
+  color: var(--signal-green);
+  text-shadow: 0 0 30px var(--signal-green-glow);
+  animation: victoryShine 3s ease-in-out infinite;
+}
+
+.game-over-box.victory {
+  border-color: rgba(46,204,113,0.3);
+  box-shadow: var(--shadow-heavy), 0 0 60px var(--signal-green-glow);
+}
+
+.game-over-box.defeat #game-over-message {
+  color: var(--signal-red);
+  text-shadow: 0 0 30px var(--signal-red-glow);
+}
+
+.game-over-box.defeat {
+  border-color: rgba(231,76,60,0.3);
+  box-shadow: var(--shadow-heavy), 0 0 60px var(--signal-red-glow);
+}
+
+.game-over-stats {
+  margin: 1.2rem 0;
+  text-align: left;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(74,111,165,0.1);
+}
+
+.stat-row:last-child { border-bottom: none; }
+
+.stat-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.stat-value {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+#play-again-btn {
+  padding: 0.75rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ocean-abyss);
+  background: linear-gradient(135deg, var(--signal-green), var(--signal-green-dark));
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: inherit;
+  transition: all var(--transition-mid);
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+#play-again-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 200%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.6s ease;
+}
+
+#play-again-btn:hover::before { left: 100%; }
+#play-again-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px var(--signal-green-glow), var(--shadow-glow-green); }
+#play-again-btn:active { transform: translateY(0) scale(0.97); }
+
+/* -- Focus States -- */
+button:focus-visible,
+select:focus-visible,
+.ship-option:focus-visible,
+.cell:focus-visible {
+  outline: 2px solid var(--signal-green);
+  outline-offset: 2px;
+}
+
+/* -- Responsive -- */
+@media (max-width: 960px) {
+  :root {
+    --cell-size: 36px;
+    --label-size: 24px;
+  }
+  .boards-container { flex-direction: column; align-items: center; gap: 1.5rem; }
+  .bottom-panels { flex-direction: column; align-items: center; }
+  .fleet-status, .combat-log { max-width: 100%; width: 92%; }
+}
+
+@media (max-width: 520px) {
+  :root {
+    --cell-size: 30px;
+    --label-size: 20px;
+  }
+  header h1 { font-size: 1.5rem; letter-spacing: 0.12em; }
+  #status-message { font-size: 0.9rem; padding: 0.5rem 1rem; }
+  #placement-panel { padding: 0.7rem 0.8rem; gap: 0.5rem; }
+  .ship-option { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+  .game-over-box { padding: 2rem 1.5rem; }
+  #game-over-message { font-size: 1.5rem; }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --cell-size: 26px;
+    --label-size: 18px;
+  }
+  .label { font-size: 0.6rem; }
+}
   </style>
 </head>
 <body>
 
+<div class="game-container">
   <header>
     <h1>Battleships</h1>
+    <p class="subtitle">Naval Warfare Command</p>
   </header>
+
+  <!-- Top Controls -->
+  <div class="top-controls">
+    <div class="control-group">
+      <label for="difficulty-select">Difficulty</label>
+      <select id="difficulty-select">
+        <option value="easy">Easy</option>
+        <option value="normal" selected>Normal</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    <button class="sound-toggle" id="sound-toggle" title="Toggle sound">Sound: ON</button>
+  </div>
 
   <div id="status-message">Place your ships to begin</div>
 
   <!-- Ship Placement Panel -->
   <div id="placement-panel">
     <h3>Deploy Your Fleet</h3>
-    <div class="ship-option active" data-ship="carrier" data-size="5">
-      Carrier <span class="ship-size">(5)</span>
-    </div>
-    <div class="ship-option" data-ship="battleship" data-size="4">
-      Battleship <span class="ship-size">(4)</span>
-    </div>
-    <div class="ship-option" data-ship="cruiser" data-size="3">
-      Cruiser <span class="ship-size">(3)</span>
-    </div>
-    <div class="ship-option" data-ship="submarine" data-size="3">
-      Submarine <span class="ship-size">(3)</span>
-    </div>
-    <div class="ship-option" data-ship="destroyer" data-size="2">
-      Destroyer <span class="ship-size">(2)</span>
-    </div>
+    <div class="ship-option active" data-ship="carrier" data-size="5">Carrier <span class="ship-size">(5)</span></div>
+    <div class="ship-option" data-ship="battleship" data-size="4">Battleship <span class="ship-size">(4)</span></div>
+    <div class="ship-option" data-ship="cruiser" data-size="3">Cruiser <span class="ship-size">(3)</span></div>
+    <div class="ship-option" data-ship="submarine" data-size="3">Submarine <span class="ship-size">(3)</span></div>
+    <div class="ship-option" data-ship="destroyer" data-size="2">Destroyer <span class="ship-size">(2)</span></div>
     <button id="rotate-btn" title="Press R to rotate">Rotate (R)</button>
-    <p class="placement-instructions">Click on your grid to place the selected ship. Press <strong>R</strong> to rotate.</p>
+    <button id="auto-place-btn" title="Auto-place ships randomly">Auto Place</button>
+    <p class="placement-instructions">Click on your grid to place. Press <strong>R</strong> to rotate. Or use <strong>Auto Place</strong>.</p>
   </div>
 
   <!-- Game Boards -->
   <div class="boards-container">
-
-    <!-- Player Board -->
     <div class="board-section">
       <h2>Your Fleet</h2>
-      <div class="grid" id="player-grid">
-        <!-- Corner -->
-        <div class="label corner"></div>
-        <!-- Column headers A-J -->
-        <div class="label col-header">A</div>
-        <div class="label col-header">B</div>
-        <div class="label col-header">C</div>
-        <div class="label col-header">D</div>
-        <div class="label col-header">E</div>
-        <div class="label col-header">F</div>
-        <div class="label col-header">G</div>
-        <div class="label col-header">H</div>
-        <div class="label col-header">I</div>
-        <div class="label col-header">J</div>
-        <!-- Rows 1-10, each with row label + 10 cells -->
-        <div class="label row-header">1</div>
-        <div class="cell" data-row="0" data-col="0"></div>
-        <div class="cell" data-row="0" data-col="1"></div>
-        <div class="cell" data-row="0" data-col="2"></div>
-        <div class="cell" data-row="0" data-col="3"></div>
-        <div class="cell" data-row="0" data-col="4"></div>
-        <div class="cell" data-row="0" data-col="5"></div>
-        <div class="cell" data-row="0" data-col="6"></div>
-        <div class="cell" data-row="0" data-col="7"></div>
-        <div class="cell" data-row="0" data-col="8"></div>
-        <div class="cell" data-row="0" data-col="9"></div>
-        <div class="label row-header">2</div>
-        <div class="cell" data-row="1" data-col="0"></div>
-        <div class="cell" data-row="1" data-col="1"></div>
-        <div class="cell" data-row="1" data-col="2"></div>
-        <div class="cell" data-row="1" data-col="3"></div>
-        <div class="cell" data-row="1" data-col="4"></div>
-        <div class="cell" data-row="1" data-col="5"></div>
-        <div class="cell" data-row="1" data-col="6"></div>
-        <div class="cell" data-row="1" data-col="7"></div>
-        <div class="cell" data-row="1" data-col="8"></div>
-        <div class="cell" data-row="1" data-col="9"></div>
-        <div class="label row-header">3</div>
-        <div class="cell" data-row="2" data-col="0"></div>
-        <div class="cell" data-row="2" data-col="1"></div>
-        <div class="cell" data-row="2" data-col="2"></div>
-        <div class="cell" data-row="2" data-col="3"></div>
-        <div class="cell" data-row="2" data-col="4"></div>
-        <div class="cell" data-row="2" data-col="5"></div>
-        <div class="cell" data-row="2" data-col="6"></div>
-        <div class="cell" data-row="2" data-col="7"></div>
-        <div class="cell" data-row="2" data-col="8"></div>
-        <div class="cell" data-row="2" data-col="9"></div>
-        <div class="label row-header">4</div>
-        <div class="cell" data-row="3" data-col="0"></div>
-        <div class="cell" data-row="3" data-col="1"></div>
-        <div class="cell" data-row="3" data-col="2"></div>
-        <div class="cell" data-row="3" data-col="3"></div>
-        <div class="cell" data-row="3" data-col="4"></div>
-        <div class="cell" data-row="3" data-col="5"></div>
-        <div class="cell" data-row="3" data-col="6"></div>
-        <div class="cell" data-row="3" data-col="7"></div>
-        <div class="cell" data-row="3" data-col="8"></div>
-        <div class="cell" data-row="3" data-col="9"></div>
-        <div class="label row-header">5</div>
-        <div class="cell" data-row="4" data-col="0"></div>
-        <div class="cell" data-row="4" data-col="1"></div>
-        <div class="cell" data-row="4" data-col="2"></div>
-        <div class="cell" data-row="4" data-col="3"></div>
-        <div class="cell" data-row="4" data-col="4"></div>
-        <div class="cell" data-row="4" data-col="5"></div>
-        <div class="cell" data-row="4" data-col="6"></div>
-        <div class="cell" data-row="4" data-col="7"></div>
-        <div class="cell" data-row="4" data-col="8"></div>
-        <div class="cell" data-row="4" data-col="9"></div>
-        <div class="label row-header">6</div>
-        <div class="cell" data-row="5" data-col="0"></div>
-        <div class="cell" data-row="5" data-col="1"></div>
-        <div class="cell" data-row="5" data-col="2"></div>
-        <div class="cell" data-row="5" data-col="3"></div>
-        <div class="cell" data-row="5" data-col="4"></div>
-        <div class="cell" data-row="5" data-col="5"></div>
-        <div class="cell" data-row="5" data-col="6"></div>
-        <div class="cell" data-row="5" data-col="7"></div>
-        <div class="cell" data-row="5" data-col="8"></div>
-        <div class="cell" data-row="5" data-col="9"></div>
-        <div class="label row-header">7</div>
-        <div class="cell" data-row="6" data-col="0"></div>
-        <div class="cell" data-row="6" data-col="1"></div>
-        <div class="cell" data-row="6" data-col="2"></div>
-        <div class="cell" data-row="6" data-col="3"></div>
-        <div class="cell" data-row="6" data-col="4"></div>
-        <div class="cell" data-row="6" data-col="5"></div>
-        <div class="cell" data-row="6" data-col="6"></div>
-        <div class="cell" data-row="6" data-col="7"></div>
-        <div class="cell" data-row="6" data-col="8"></div>
-        <div class="cell" data-row="6" data-col="9"></div>
-        <div class="label row-header">8</div>
-        <div class="cell" data-row="7" data-col="0"></div>
-        <div class="cell" data-row="7" data-col="1"></div>
-        <div class="cell" data-row="7" data-col="2"></div>
-        <div class="cell" data-row="7" data-col="3"></div>
-        <div class="cell" data-row="7" data-col="4"></div>
-        <div class="cell" data-row="7" data-col="5"></div>
-        <div class="cell" data-row="7" data-col="6"></div>
-        <div class="cell" data-row="7" data-col="7"></div>
-        <div class="cell" data-row="7" data-col="8"></div>
-        <div class="cell" data-row="7" data-col="9"></div>
-        <div class="label row-header">9</div>
-        <div class="cell" data-row="8" data-col="0"></div>
-        <div class="cell" data-row="8" data-col="1"></div>
-        <div class="cell" data-row="8" data-col="2"></div>
-        <div class="cell" data-row="8" data-col="3"></div>
-        <div class="cell" data-row="8" data-col="4"></div>
-        <div class="cell" data-row="8" data-col="5"></div>
-        <div class="cell" data-row="8" data-col="6"></div>
-        <div class="cell" data-row="8" data-col="7"></div>
-        <div class="cell" data-row="8" data-col="8"></div>
-        <div class="cell" data-row="8" data-col="9"></div>
-        <div class="label row-header">10</div>
-        <div class="cell" data-row="9" data-col="0"></div>
-        <div class="cell" data-row="9" data-col="1"></div>
-        <div class="cell" data-row="9" data-col="2"></div>
-        <div class="cell" data-row="9" data-col="3"></div>
-        <div class="cell" data-row="9" data-col="4"></div>
-        <div class="cell" data-row="9" data-col="5"></div>
-        <div class="cell" data-row="9" data-col="6"></div>
-        <div class="cell" data-row="9" data-col="7"></div>
-        <div class="cell" data-row="9" data-col="8"></div>
-        <div class="cell" data-row="9" data-col="9"></div>
-      </div>
+      <div class="grid" id="player-grid"></div>
     </div>
-
-    <!-- Enemy Board -->
     <div class="board-section">
       <h2>Enemy Waters</h2>
-      <div class="grid" id="enemy-grid">
-        <!-- Corner -->
-        <div class="label corner"></div>
-        <!-- Column headers A-J -->
-        <div class="label col-header">A</div>
-        <div class="label col-header">B</div>
-        <div class="label col-header">C</div>
-        <div class="label col-header">D</div>
-        <div class="label col-header">E</div>
-        <div class="label col-header">F</div>
-        <div class="label col-header">G</div>
-        <div class="label col-header">H</div>
-        <div class="label col-header">I</div>
-        <div class="label col-header">J</div>
-        <!-- Rows 1-10, each with row label + 10 cells -->
-        <div class="label row-header">1</div>
-        <div class="cell" data-row="0" data-col="0"></div>
-        <div class="cell" data-row="0" data-col="1"></div>
-        <div class="cell" data-row="0" data-col="2"></div>
-        <div class="cell" data-row="0" data-col="3"></div>
-        <div class="cell" data-row="0" data-col="4"></div>
-        <div class="cell" data-row="0" data-col="5"></div>
-        <div class="cell" data-row="0" data-col="6"></div>
-        <div class="cell" data-row="0" data-col="7"></div>
-        <div class="cell" data-row="0" data-col="8"></div>
-        <div class="cell" data-row="0" data-col="9"></div>
-        <div class="label row-header">2</div>
-        <div class="cell" data-row="1" data-col="0"></div>
-        <div class="cell" data-row="1" data-col="1"></div>
-        <div class="cell" data-row="1" data-col="2"></div>
-        <div class="cell" data-row="1" data-col="3"></div>
-        <div class="cell" data-row="1" data-col="4"></div>
-        <div class="cell" data-row="1" data-col="5"></div>
-        <div class="cell" data-row="1" data-col="6"></div>
-        <div class="cell" data-row="1" data-col="7"></div>
-        <div class="cell" data-row="1" data-col="8"></div>
-        <div class="cell" data-row="1" data-col="9"></div>
-        <div class="label row-header">3</div>
-        <div class="cell" data-row="2" data-col="0"></div>
-        <div class="cell" data-row="2" data-col="1"></div>
-        <div class="cell" data-row="2" data-col="2"></div>
-        <div class="cell" data-row="2" data-col="3"></div>
-        <div class="cell" data-row="2" data-col="4"></div>
-        <div class="cell" data-row="2" data-col="5"></div>
-        <div class="cell" data-row="2" data-col="6"></div>
-        <div class="cell" data-row="2" data-col="7"></div>
-        <div class="cell" data-row="2" data-col="8"></div>
-        <div class="cell" data-row="2" data-col="9"></div>
-        <div class="label row-header">4</div>
-        <div class="cell" data-row="3" data-col="0"></div>
-        <div class="cell" data-row="3" data-col="1"></div>
-        <div class="cell" data-row="3" data-col="2"></div>
-        <div class="cell" data-row="3" data-col="3"></div>
-        <div class="cell" data-row="3" data-col="4"></div>
-        <div class="cell" data-row="3" data-col="5"></div>
-        <div class="cell" data-row="3" data-col="6"></div>
-        <div class="cell" data-row="3" data-col="7"></div>
-        <div class="cell" data-row="3" data-col="8"></div>
-        <div class="cell" data-row="3" data-col="9"></div>
-        <div class="label row-header">5</div>
-        <div class="cell" data-row="4" data-col="0"></div>
-        <div class="cell" data-row="4" data-col="1"></div>
-        <div class="cell" data-row="4" data-col="2"></div>
-        <div class="cell" data-row="4" data-col="3"></div>
-        <div class="cell" data-row="4" data-col="4"></div>
-        <div class="cell" data-row="4" data-col="5"></div>
-        <div class="cell" data-row="4" data-col="6"></div>
-        <div class="cell" data-row="4" data-col="7"></div>
-        <div class="cell" data-row="4" data-col="8"></div>
-        <div class="cell" data-row="4" data-col="9"></div>
-        <div class="label row-header">6</div>
-        <div class="cell" data-row="5" data-col="0"></div>
-        <div class="cell" data-row="5" data-col="1"></div>
-        <div class="cell" data-row="5" data-col="2"></div>
-        <div class="cell" data-row="5" data-col="3"></div>
-        <div class="cell" data-row="5" data-col="4"></div>
-        <div class="cell" data-row="5" data-col="5"></div>
-        <div class="cell" data-row="5" data-col="6"></div>
-        <div class="cell" data-row="5" data-col="7"></div>
-        <div class="cell" data-row="5" data-col="8"></div>
-        <div class="cell" data-row="5" data-col="9"></div>
-        <div class="label row-header">7</div>
-        <div class="cell" data-row="6" data-col="0"></div>
-        <div class="cell" data-row="6" data-col="1"></div>
-        <div class="cell" data-row="6" data-col="2"></div>
-        <div class="cell" data-row="6" data-col="3"></div>
-        <div class="cell" data-row="6" data-col="4"></div>
-        <div class="cell" data-row="6" data-col="5"></div>
-        <div class="cell" data-row="6" data-col="6"></div>
-        <div class="cell" data-row="6" data-col="7"></div>
-        <div class="cell" data-row="6" data-col="8"></div>
-        <div class="cell" data-row="6" data-col="9"></div>
-        <div class="label row-header">8</div>
-        <div class="cell" data-row="7" data-col="0"></div>
-        <div class="cell" data-row="7" data-col="1"></div>
-        <div class="cell" data-row="7" data-col="2"></div>
-        <div class="cell" data-row="7" data-col="3"></div>
-        <div class="cell" data-row="7" data-col="4"></div>
-        <div class="cell" data-row="7" data-col="5"></div>
-        <div class="cell" data-row="7" data-col="6"></div>
-        <div class="cell" data-row="7" data-col="7"></div>
-        <div class="cell" data-row="7" data-col="8"></div>
-        <div class="cell" data-row="7" data-col="9"></div>
-        <div class="label row-header">9</div>
-        <div class="cell" data-row="8" data-col="0"></div>
-        <div class="cell" data-row="8" data-col="1"></div>
-        <div class="cell" data-row="8" data-col="2"></div>
-        <div class="cell" data-row="8" data-col="3"></div>
-        <div class="cell" data-row="8" data-col="4"></div>
-        <div class="cell" data-row="8" data-col="5"></div>
-        <div class="cell" data-row="8" data-col="6"></div>
-        <div class="cell" data-row="8" data-col="7"></div>
-        <div class="cell" data-row="8" data-col="8"></div>
-        <div class="cell" data-row="8" data-col="9"></div>
-        <div class="label row-header">10</div>
-        <div class="cell" data-row="9" data-col="0"></div>
-        <div class="cell" data-row="9" data-col="1"></div>
-        <div class="cell" data-row="9" data-col="2"></div>
-        <div class="cell" data-row="9" data-col="3"></div>
-        <div class="cell" data-row="9" data-col="4"></div>
-        <div class="cell" data-row="9" data-col="5"></div>
-        <div class="cell" data-row="9" data-col="6"></div>
-        <div class="cell" data-row="9" data-col="7"></div>
-        <div class="cell" data-row="9" data-col="8"></div>
-        <div class="cell" data-row="9" data-col="9"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Game Over Overlay -->
-  <div id="game-over-overlay">
-    <div class="game-over-box">
-      <div id="game-over-message">Victory!</div>
-      <button id="play-again-btn">Play Again</button>
+      <div class="grid" id="enemy-grid"></div>
     </div>
   </div>
 
-  <script>
-// ============================================================
-// GAME ENGINE (from engine.js)
-// ============================================================
+  <!-- Bottom Panels: Fleet Status + Combat Log -->
+  <div class="bottom-panels">
+    <div class="fleet-status" id="player-fleet-status">
+      <h3>Your Fleet</h3>
+      <div id="player-fleet-list"></div>
+    </div>
+    <div class="combat-log">
+      <h3>Combat Log</h3>
+      <div class="log-entries" id="log-entries"></div>
+    </div>
+    <div class="fleet-status" id="enemy-fleet-status">
+      <h3>Enemy Fleet</h3>
+      <div id="enemy-fleet-list"></div>
+    </div>
+  </div>
+</div>
 
-var SHIPS = {
-  Carrier:    { name: 'Carrier',    size: 5 },
-  Battleship: { name: 'Battleship', size: 4 },
-  Cruiser:    { name: 'Cruiser',    size: 3 },
-  Submarine:  { name: 'Submarine',  size: 3 },
-  Destroyer:  { name: 'Destroyer',  size: 2 }
-};
+<!-- Game Over Overlay -->
+<div id="game-over-overlay">
+  <div class="game-over-box" id="game-over-box">
+    <div id="game-over-message">Victory!</div>
+    <div class="game-over-stats" id="game-over-stats"></div>
+    <button id="play-again-btn">Play Again</button>
+  </div>
+</div>
 
-var COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-var BOARD_SIZE = 10;
+<!-- ============================================================ -->
+<!-- GAME ENGINE -->
+<!-- ============================================================ -->
+<script>
+(function () {
+  'use strict';
 
-function createBoard() {
-  var board = [];
-  for (var r = 0; r < BOARD_SIZE; r++) {
-    var row = [];
-    for (var c = 0; c < BOARD_SIZE; c++) {
-      row.push(null);
+  var BOARD_SIZE = 10;
+  var COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+
+  var SHIPS = {
+    Carrier:    { name: 'Carrier',    size: 5 },
+    Battleship: { name: 'Battleship', size: 4 },
+    Cruiser:    { name: 'Cruiser',    size: 3 },
+    Submarine:  { name: 'Submarine',  size: 3 },
+    Destroyer:  { name: 'Destroyer',  size: 2 }
+  };
+
+  function createBoard() {
+    var board = [];
+    for (var r = 0; r < BOARD_SIZE; r++) {
+      var row = [];
+      for (var c = 0; c < BOARD_SIZE; c++) { row.push(null); }
+      board.push(row);
     }
-    board.push(row);
+    return board;
   }
-  return board;
-}
 
-function canPlaceShip(board, size, row, col, horizontal) {
-  for (var i = 0; i < size; i++) {
-    var r = horizontal ? row : row + i;
-    var c = horizontal ? col + i : col;
-    if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) {
-      return false;
+  function canPlaceShip(board, size, row, col, horizontal) {
+    if (typeof size !== 'number' || size < 1) return false;
+    if (typeof row !== 'number' || typeof col !== 'number') return false;
+    for (var i = 0; i < size; i++) {
+      var r = horizontal ? row : row + i;
+      var c = horizontal ? col + i : col;
+      if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) return false;
+      if (board[r][c] !== null) return false;
     }
-    if (board[r][c] !== null) {
-      return false;
-    }
+    return true;
   }
-  return true;
-}
 
-function placeShip(board, ships, shipName, size, row, col, horizontal) {
-  if (!canPlaceShip(board, size, row, col, horizontal)) {
+  function placeShip(board, ships, shipName, size, row, col, horizontal) {
+    if (!canPlaceShip(board, size, row, col, horizontal)) return null;
+    var positions = [];
+    for (var i = 0; i < size; i++) {
+      var r = horizontal ? row : row + i;
+      var c = horizontal ? col + i : col;
+      board[r][c] = 'ship';
+      positions.push({ row: r, col: c });
+    }
+    ships.push({ name: shipName, size: size, positions: positions, hits: 0, sunk: false });
+    return { board: board, ships: ships };
+  }
+
+  function getShipAt(ships, row, col) {
+    for (var i = 0; i < ships.length; i++) {
+      var positions = ships[i].positions;
+      for (var j = 0; j < positions.length; j++) {
+        if (positions[j].row === row && positions[j].col === col) return ships[i];
+      }
+    }
     return null;
   }
 
-  var positions = [];
-  for (var i = 0; i < size; i++) {
-    var r = horizontal ? row : row + i;
-    var c = horizontal ? col + i : col;
-    board[r][c] = 'ship';
-    positions.push({ row: r, col: c });
-  }
-
-  ships.push({
-    name: shipName,
-    size: size,
-    positions: positions,
-    hits: 0,
-    sunk: false
-  });
-
-  return { board: board, ships: ships };
-}
-
-function getShipAt(ships, row, col) {
-  for (var i = 0; i < ships.length; i++) {
-    var positions = ships[i].positions;
-    for (var j = 0; j < positions.length; j++) {
-      if (positions[j].row === row && positions[j].col === col) {
-        return ships[i];
+  function randomPlacement() {
+    var board = createBoard();
+    var ships = [];
+    var shipDefs = [
+      { name: 'Carrier', size: 5 }, { name: 'Battleship', size: 4 },
+      { name: 'Cruiser', size: 3 }, { name: 'Submarine', size: 3 },
+      { name: 'Destroyer', size: 2 }
+    ];
+    for (var s = 0; s < shipDefs.length; s++) {
+      var placed = false;
+      var attempts = 0;
+      while (!placed) {
+        attempts++;
+        if (attempts > 1000) { board = createBoard(); ships = []; s = -1; break; }
+        var horizontal = Math.random() < 0.5;
+        var row = Math.floor(Math.random() * BOARD_SIZE);
+        var col = Math.floor(Math.random() * BOARD_SIZE);
+        var result = placeShip(board, ships, shipDefs[s].name, shipDefs[s].size, row, col, horizontal);
+        if (result !== null) placed = true;
       }
     }
+    return { board: board, ships: ships };
   }
-  return null;
-}
 
-function processShot(board, ships, row, col) {
-  if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
+  function processShot(board, ships, row, col) {
+    if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return { result: 'miss' };
+    var cell = board[row][col];
+    if (cell === 'hit' || cell === 'miss') return { result: cell, alreadyFired: true };
+    if (cell === 'ship') {
+      board[row][col] = 'hit';
+      var ship = getShipAt(ships, row, col);
+      if (ship) {
+        ship.hits++;
+        if (ship.hits >= ship.size) { ship.sunk = true; return { result: 'sunk', shipName: ship.name }; }
+        return { result: 'hit', shipName: ship.name };
+      }
+      return { result: 'hit' };
+    }
+    board[row][col] = 'miss';
     return { result: 'miss' };
   }
 
-  var cell = board[row][col];
-
-  if (cell === 'hit' || cell === 'miss') {
-    return { result: cell, alreadyFired: true };
+  function isGameOver(ships) {
+    if (!ships || ships.length === 0) return false;
+    for (var i = 0; i < ships.length; i++) { if (!ships[i].sunk) return false; }
+    return true;
   }
 
-  if (cell === 'ship') {
-    board[row][col] = 'hit';
-    var ship = getShipAt(ships, row, col);
-    ship.hits++;
-    if (ship.hits >= ship.size) {
-      ship.sunk = true;
-      return { result: 'sunk', shipName: ship.name };
-    }
-    return { result: 'hit', shipName: ship.name };
+  function colToIndex(letter) {
+    if (typeof letter !== 'string' || letter.length === 0) return NaN;
+    var index = letter.toUpperCase().charCodeAt(0) - 65;
+    if (index < 0 || index >= BOARD_SIZE) return NaN;
+    return index;
   }
 
-  board[row][col] = 'miss';
-  return { result: 'miss' };
-}
-
-function isGameOver(ships) {
-  for (var i = 0; i < ships.length; i++) {
-    if (!ships[i].sunk) {
-      return false;
-    }
+  function indexToCol(index) {
+    if (typeof index !== 'number' || index < 0 || index >= BOARD_SIZE) return '';
+    return String.fromCharCode(65 + index);
   }
-  return ships.length > 0;
-}
 
-function colToIndex(letter) {
-  return letter.toUpperCase().charCodeAt(0) - 65;
-}
+  function formatCoord(row, col) {
+    var colLetter = indexToCol(col);
+    if (colLetter === '') return '';
+    return colLetter + (row + 1);
+  }
 
-function indexToCol(index) {
-  return String.fromCharCode(65 + index);
-}
-
-function parseCoord(coord) {
-  var letter = coord.charAt(0).toUpperCase();
-  var num = parseInt(coord.substring(1), 10);
-  return {
-    row: num - 1,
-    col: colToIndex(letter)
+  window.Engine = {
+    BOARD_SIZE: BOARD_SIZE, COLUMNS: COLUMNS, SHIPS: SHIPS,
+    createBoard: createBoard, canPlaceShip: canPlaceShip, placeShip: placeShip,
+    getShipAt: getShipAt, randomPlacement: randomPlacement,
+    processShot: processShot, isGameOver: isGameOver,
+    colToIndex: colToIndex, indexToCol: indexToCol, formatCoord: formatCoord
   };
-}
+})();
+</script>
 
-function formatCoord(row, col) {
-  return indexToCol(col) + (row + 1);
-}
-
-function randomPlacement() {
-  var board = createBoard();
-  var ships = [];
-  var shipDefs = [
-    { name: 'Carrier',    size: 5 },
-    { name: 'Battleship', size: 4 },
-    { name: 'Cruiser',    size: 3 },
-    { name: 'Submarine',  size: 3 },
-    { name: 'Destroyer',  size: 2 }
-  ];
-
-  for (var s = 0; s < shipDefs.length; s++) {
-    var placed = false;
-    while (!placed) {
-      var horizontal = Math.random() < 0.5;
-      var row = Math.floor(Math.random() * BOARD_SIZE);
-      var col = Math.floor(Math.random() * BOARD_SIZE);
-      var result = placeShip(board, ships, shipDefs[s].name, shipDefs[s].size, row, col, horizontal);
-      if (result !== null) {
-        placed = true;
-      }
-    }
-  }
-
-  return { board: board, ships: ships };
-}
-
-// ============================================================
-// AI OPPONENT (from ai.js)
-// ============================================================
-
-var AI_SHIPS = [
-  { name: 'Carrier',    size: 5 },
-  { name: 'Battleship', size: 4 },
-  { name: 'Cruiser',    size: 3 },
-  { name: 'Submarine',  size: 3 },
-  { name: 'Destroyer',  size: 2 }
-];
-
-function createEmptyBoard() {
-  var board = [];
-  for (var r = 0; r < 10; r++) {
-    var row = [];
-    for (var c = 0; c < 10; c++) {
-      row.push(null);
-    }
-    board.push(row);
-  }
-  return board;
-}
-
-function tryPlaceShip(board, size, row, col, orientation) {
-  var cells = [];
-  for (var i = 0; i < size; i++) {
-    var r = orientation === 'vertical'   ? row + i : row;
-    var c = orientation === 'horizontal' ? col + i : col;
-    if (r < 0 || r >= 10 || c < 0 || c >= 10) return null;
-    if (board[r][c] !== null) return null;
-    cells.push({ row: r, col: c });
-  }
-  return cells;
-}
-
-function aiPlaceShips(board, ships) {
-  board = board || createEmptyBoard();
-  var shipDefs = ships || AI_SHIPS;
-
-  var placed = [];
-
-  for (var s = 0; s < shipDefs.length; s++) {
-    var def  = shipDefs[s];
-    var size = def.size;
-    var cells = null;
-
-    var attempts = 0;
-    while (cells === null) {
-      attempts++;
-      if (attempts > 1000) {
-        board = createEmptyBoard();
-        placed = [];
-        s = -1;
-        break;
-      }
-      var orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-      var maxRow = orientation === 'vertical'   ? 10 - size : 9;
-      var maxCol = orientation === 'horizontal' ? 10 - size : 9;
-      var row = Math.floor(Math.random() * (maxRow + 1));
-      var col = Math.floor(Math.random() * (maxCol + 1));
-      cells = tryPlaceShip(board, size, row, col, orientation);
-    }
-
-    if (cells === null) continue;
-
-    for (var i = 0; i < cells.length; i++) {
-      board[cells[i].row][cells[i].col] = 'ship';
-    }
-
-    placed.push({
-      name: def.name,
-      size: size,
-      cells: cells
-    });
-  }
-
-  return { board: board, ships: placed };
-}
-
-function createAIState() {
-  return {
-    previousShots: {},
-    hitQueue:      [],
-    lastHits:      [],
-    shotCount:     0
-  };
-}
-
-function updateAIState(aiState, row, col, result) {
-  var key = row + ',' + col;
-  aiState.previousShots[key] = true;
-  aiState.shotCount++;
-
-  if (result === 'hit') {
-    aiState.lastHits.push({ row: row, col: col });
-    addAdjacentTargets(aiState, row, col);
-  } else if (result === 'sunk') {
-    aiState.lastHits.push({ row: row, col: col });
-    pruneAfterSink(aiState);
-  }
-}
-
-function addAdjacentTargets(aiState, row, col) {
-  var directions = [
-    { row: row - 1, col: col },
-    { row: row + 1, col: col },
-    { row: row,     col: col - 1 },
-    { row: row,     col: col + 1 }
-  ];
-
-  for (var d = 0; d < directions.length; d++) {
-    var r = directions[d].row;
-    var c = directions[d].col;
-    if (r < 0 || r >= 10 || c < 0 || c >= 10) continue;
-
-    var key = r + ',' + c;
-    if (aiState.previousShots[key]) continue;
-
-    var alreadyQueued = false;
-    for (var q = 0; q < aiState.hitQueue.length; q++) {
-      if (aiState.hitQueue[q].row === r && aiState.hitQueue[q].col === c) {
-        alreadyQueued = true;
-        break;
-      }
-    }
-    if (!alreadyQueued) {
-      aiState.hitQueue.push({ row: r, col: c });
-    }
-  }
-
-  if (aiState.lastHits.length >= 2) {
-    prioritiseLineDirection(aiState);
-  }
-}
-
-function prioritiseLineDirection(aiState) {
-  var hits = aiState.lastHits;
-  if (hits.length < 2) return;
-
-  var allSameRow = true;
-  var allSameCol = true;
-  for (var i = 1; i < hits.length; i++) {
-    if (hits[i].row !== hits[0].row) allSameRow = false;
-    if (hits[i].col !== hits[0].col) allSameCol = false;
-  }
-
-  if (!allSameRow && !allSameCol) return;
-
-  var priority = [];
-  var rest = [];
-
-  for (var q = 0; q < aiState.hitQueue.length; q++) {
-    var cell = aiState.hitQueue[q];
-    var isOnLine = false;
-
-    if (allSameRow && cell.row === hits[0].row) isOnLine = true;
-    if (allSameCol && cell.col === hits[0].col) isOnLine = true;
-
-    if (isOnLine) {
-      priority.push(cell);
-    } else {
-      rest.push(cell);
-    }
-  }
-
-  aiState.hitQueue = priority.concat(rest);
-}
-
-function pruneAfterSink(aiState) {
-  var sunkKeys = {};
-  for (var i = 0; i < aiState.lastHits.length; i++) {
-    var h = aiState.lastHits[i];
-    sunkKeys[h.row + ',' + h.col] = true;
-  }
-
-  var newQueue = [];
-  for (var q = 0; q < aiState.hitQueue.length; q++) {
-    var cell = aiState.hitQueue[q];
-    var key = cell.row + ',' + cell.col;
-    if (aiState.previousShots[key]) continue;
-    newQueue.push(cell);
-  }
-
-  var filtered = [];
-  for (var f = 0; f < newQueue.length; f++) {
-    var c = newQueue[f];
-    var adjToNonSunk = false;
-
-    var neighbours = [
-      (c.row - 1) + ',' + c.col,
-      (c.row + 1) + ',' + c.col,
-      c.row + ',' + (c.col - 1),
-      c.row + ',' + (c.col + 1)
-    ];
-
-    for (var n = 0; n < neighbours.length; n++) {
-      if (aiState.previousShots[neighbours[n]] && !sunkKeys[neighbours[n]]) {
-        adjToNonSunk = true;
-        break;
-      }
-    }
-
-    var adjToSunk = false;
-    for (var n2 = 0; n2 < neighbours.length; n2++) {
-      if (sunkKeys[neighbours[n2]]) {
-        adjToSunk = true;
-        break;
-      }
-    }
-
-    if (!adjToSunk || adjToNonSunk) {
-      filtered.push(c);
-    }
-  }
-
-  aiState.hitQueue = filtered;
-  aiState.lastHits = [];
-}
-
-function getAIShot(aiState) {
-  while (aiState.hitQueue.length > 0) {
-    var target = aiState.hitQueue.shift();
-    var key = target.row + ',' + target.col;
-    if (!aiState.previousShots[key]) {
-      return { row: target.row, col: target.col };
-    }
-  }
-
-  var candidates = [];
-  var fallback   = [];
-
-  for (var r = 0; r < 10; r++) {
-    for (var c = 0; c < 10; c++) {
-      var k = r + ',' + c;
-      if (aiState.previousShots[k]) continue;
-      if ((r + c) % 2 === 0) {
-        candidates.push({ row: r, col: c });
-      } else {
-        fallback.push({ row: r, col: c });
-      }
-    }
-  }
-
-  var pool = candidates.length > 0 ? candidates : fallback;
-
-  if (pool.length === 0) {
-    return { row: 0, col: 0 };
-  }
-
-  var pick = Math.floor(Math.random() * pool.length);
-  return { row: pool[pick].row, col: pool[pick].col };
-}
-
-// ============================================================
-// GLUE CODE — wires engine + AI + UI together
-// ============================================================
-
+<!-- ============================================================ -->
+<!-- AI OPPONENT -->
+<!-- ============================================================ -->
+<script>
 (function () {
+  'use strict';
+
+  var BOARD = 10;
+  var SHIP_DEFS = [
+    { name: 'Carrier', size: 5 }, { name: 'Battleship', size: 4 },
+    { name: 'Cruiser', size: 3 }, { name: 'Submarine', size: 3 },
+    { name: 'Destroyer', size: 2 }
+  ];
+
+  function key(r, c) { return r + ',' + c; }
+  function inBounds(r, c) { return r >= 0 && r < BOARD && c >= 0 && c < BOARD; }
+
+  function emptyBoard() {
+    var b = [];
+    for (var r = 0; r < BOARD; r++) { var row = []; for (var c = 0; c < BOARD; c++) row.push(null); b.push(row); }
+    return b;
+  }
+
+  function canPlace(board, size, row, col, horiz) {
+    for (var i = 0; i < size; i++) {
+      var r = horiz ? row : row + i;
+      var c = horiz ? col + i : col;
+      if (!inBounds(r, c) || board[r][c] !== null) return false;
+    }
+    return true;
+  }
+
+  function doPlace(board, name, size, row, col, horiz) {
+    var positions = [];
+    for (var i = 0; i < size; i++) {
+      var r = horiz ? row : row + i;
+      var c = horiz ? col + i : col;
+      board[r][c] = 'ship';
+      positions.push({ row: r, col: c });
+    }
+    return { name: name, size: size, positions: positions, hits: 0, sunk: false };
+  }
+
+  function placeRandom() {
+    var board = emptyBoard(); var ships = [];
+    for (var s = 0; s < SHIP_DEFS.length; s++) {
+      var def = SHIP_DEFS[s]; var placed = false; var attempts = 0;
+      while (!placed) {
+        attempts++;
+        if (attempts > 2000) { board = emptyBoard(); ships = []; s = -1; break; }
+        var horiz = Math.random() < 0.5;
+        var row = Math.floor(Math.random() * BOARD);
+        var col = Math.floor(Math.random() * BOARD);
+        if (canPlace(board, def.size, row, col, horiz)) { ships.push(doPlace(board, def.name, def.size, row, col, horiz)); placed = true; }
+      }
+    }
+    return { board: board, ships: ships };
+  }
+
+  function placeSmart() {
+    var board = emptyBoard(); var ships = [];
+    for (var s = 0; s < SHIP_DEFS.length; s++) {
+      var def = SHIP_DEFS[s]; var bestScore = -Infinity; var bestCandidates = [];
+      for (var horiz = 0; horiz <= 1; horiz++) {
+        for (var row = 0; row < BOARD; row++) {
+          for (var col = 0; col < BOARD; col++) {
+            if (!canPlace(board, def.size, row, col, !!horiz)) continue;
+            var score = 0;
+            for (var i = 0; i < def.size; i++) {
+              var r = horiz ? row : row + i; var c = horiz ? col + i : col;
+              score += Math.min(r, c, BOARD-1-r, BOARD-1-c);
+              var dirs = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+              for (var d = 0; d < dirs.length; d++) {
+                var nr = r+dirs[d][0], nc = c+dirs[d][1];
+                if (inBounds(nr, nc) && board[nr][nc] === 'ship') score -= 3;
+              }
+            }
+            score += Math.random() * 2;
+            if (score > bestScore) { bestScore = score; bestCandidates = [{ row: row, col: col, horiz: !!horiz }]; }
+            else if (score === bestScore) bestCandidates.push({ row: row, col: col, horiz: !!horiz });
+          }
+        }
+      }
+      if (!bestCandidates.length) return placeRandom();
+      var pick = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
+      ships.push(doPlace(board, def.name, def.size, pick.row, pick.col, pick.horiz));
+    }
+    return { board: board, ships: ships };
+  }
+
+  function createState(difficulty) {
+    return { difficulty: difficulty || 'normal', previousShots: {}, hitQueue: [], lastHits: [], sunkShipSizes: [], shotCount: 0 };
+  }
+
+  function placeShips(difficulty) { return difficulty === 'hard' ? placeSmart() : placeRandom(); }
+
+  function updateState(aiState, row, col, result) {
+    aiState.previousShots[key(row, col)] = result;
+    aiState.shotCount++;
+    if (result === 'hit') {
+      aiState.lastHits.push({ row: row, col: col });
+      if (aiState.difficulty === 'easy') { if (Math.random() < 0.5) addAdj(aiState, row, col); }
+      else { addAdj(aiState, row, col); if (aiState.lastHits.length >= 2) prioritiseLine(aiState); }
+    }
+    if (result === 'sunk') {
+      aiState.lastHits.push({ row: row, col: col });
+      aiState.sunkShipSizes.push(aiState.lastHits.length);
+      pruneAfterSink(aiState);
+    }
+  }
+
+  function addAdj(aiState, row, col) {
+    var dirs = [{row:row-1,col:col},{row:row+1,col:col},{row:row,col:col-1},{row:row,col:col+1}];
+    for (var d = 0; d < dirs.length; d++) {
+      var r = dirs[d].row, c = dirs[d].col;
+      if (!inBounds(r, c) || aiState.previousShots[key(r, c)]) continue;
+      var found = false;
+      for (var q = 0; q < aiState.hitQueue.length; q++) { if (aiState.hitQueue[q].row === r && aiState.hitQueue[q].col === c) { found = true; break; } }
+      if (!found) aiState.hitQueue.push({ row: r, col: c });
+    }
+  }
+
+  function prioritiseLine(aiState) {
+    var hits = aiState.lastHits; if (hits.length < 2) return;
+    var allSameRow = true, allSameCol = true;
+    for (var i = 1; i < hits.length; i++) { if (hits[i].row !== hits[0].row) allSameRow = false; if (hits[i].col !== hits[0].col) allSameCol = false; }
+    if (!allSameRow && !allSameCol) return;
+    var priority = [], rest = [];
+    for (var q = 0; q < aiState.hitQueue.length; q++) {
+      var cell = aiState.hitQueue[q]; var onLine = false;
+      if (allSameRow && cell.row === hits[0].row) onLine = true;
+      if (allSameCol && cell.col === hits[0].col) onLine = true;
+      (onLine ? priority : rest).push(cell);
+    }
+    aiState.hitQueue = priority.concat(rest);
+  }
+
+  function pruneAfterSink(aiState) {
+    var sunkKeys = {};
+    for (var i = 0; i < aiState.lastHits.length; i++) { var h = aiState.lastHits[i]; sunkKeys[key(h.row, h.col)] = true; }
+    var newQueue = [];
+    for (var q = 0; q < aiState.hitQueue.length; q++) { var c = aiState.hitQueue[q]; if (!aiState.previousShots[key(c.row, c.col)]) newQueue.push(c); }
+    var filtered = [];
+    for (var f = 0; f < newQueue.length; f++) {
+      var cell = newQueue[f];
+      var neighbours = [key(cell.row-1,cell.col),key(cell.row+1,cell.col),key(cell.row,cell.col-1),key(cell.row,cell.col+1)];
+      var adjToUnsunk = false, adjToSunk = false;
+      for (var n = 0; n < neighbours.length; n++) { if (aiState.previousShots[neighbours[n]] === 'hit' && !sunkKeys[neighbours[n]]) adjToUnsunk = true; if (sunkKeys[neighbours[n]]) adjToSunk = true; }
+      if (!adjToSunk || adjToUnsunk) filtered.push(cell);
+    }
+    aiState.hitQueue = filtered;
+    aiState.lastHits = [];
+  }
+
+  function getShot(aiState) {
+    if (aiState.difficulty === 'easy') return getShotEasy(aiState);
+    if (aiState.difficulty === 'hard') return getShotHard(aiState);
+    return getShotNormal(aiState);
+  }
+
+  function getShotEasy(aiState) {
+    if (aiState.hitQueue.length > 0 && Math.random() < 0.5) {
+      while (aiState.hitQueue.length > 0) { var t = aiState.hitQueue.shift(); if (!aiState.previousShots[key(t.row, t.col)]) return { row: t.row, col: t.col }; }
+    }
+    var avail = [];
+    for (var r = 0; r < BOARD; r++) for (var c = 0; c < BOARD; c++) if (!aiState.previousShots[key(r, c)]) avail.push({ row: r, col: c });
+    return avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)] : { row: 0, col: 0 };
+  }
+
+  function getShotNormal(aiState) {
+    while (aiState.hitQueue.length > 0) { var t = aiState.hitQueue.shift(); if (!aiState.previousShots[key(t.row, t.col)]) return { row: t.row, col: t.col }; }
+    var cands = [], fallback = [];
+    for (var r = 0; r < BOARD; r++) for (var c = 0; c < BOARD; c++) {
+      if (aiState.previousShots[key(r, c)]) continue;
+      ((r + c) % 2 === 0 ? cands : fallback).push({ row: r, col: c });
+    }
+    var pool = cands.length > 0 ? cands : fallback;
+    return pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : { row: 0, col: 0 };
+  }
+
+  function getShotHard(aiState) {
+    var prob = buildProbMap(aiState);
+    var bestProb = -1, bestCells = [];
+    for (var r = 0; r < BOARD; r++) for (var c = 0; c < BOARD; c++) {
+      if (aiState.previousShots[key(r, c)]) continue;
+      if (prob[r][c] > bestProb) { bestProb = prob[r][c]; bestCells = [{ row: r, col: c }]; }
+      else if (prob[r][c] === bestProb) bestCells.push({ row: r, col: c });
+    }
+    return bestCells.length > 0 ? bestCells[Math.floor(Math.random() * bestCells.length)] : { row: 0, col: 0 };
+  }
+
+  function buildProbMap(aiState) {
+    var prob = []; for (var r = 0; r < BOARD; r++) { var row = []; for (var c = 0; c < BOARD; c++) row.push(0); prob.push(row); }
+    var allSizes = [5,4,3,3,2]; var remaining = allSizes.slice();
+    for (var si = 0; si < aiState.sunkShipSizes.length; si++) { var idx = remaining.indexOf(aiState.sunkShipSizes[si]); if (idx !== -1) remaining.splice(idx, 1); }
+    for (var s = 0; s < remaining.length; s++) {
+      var size = remaining[s];
+      for (var r2 = 0; r2 < BOARD; r2++) for (var c2 = 0; c2 <= BOARD - size; c2++) {
+        if (isValidP(aiState, size, r2, c2, true)) { var bonus = getBonus(aiState, size, r2, c2, true); for (var i = 0; i < size; i++) prob[r2][c2+i] += 1 + bonus; }
+      }
+      for (var r3 = 0; r3 <= BOARD - size; r3++) for (var c3 = 0; c3 < BOARD; c3++) {
+        if (isValidP(aiState, size, r3, c3, false)) { var bonus2 = getBonus(aiState, size, r3, c3, false); for (var i2 = 0; i2 < size; i2++) prob[r3+i2][c3] += 1 + bonus2; }
+      }
+    }
+    for (var r4 = 0; r4 < BOARD; r4++) for (var c4 = 0; c4 < BOARD; c4++) { if (aiState.previousShots[key(r4, c4)]) prob[r4][c4] = 0; }
+    if (aiState.lastHits.length > 0) boostHits(aiState, prob);
+    return prob;
+  }
+
+  function isValidP(aiState, size, row, col, horiz) {
+    for (var i = 0; i < size; i++) {
+      var r = horiz ? row : row + i, c = horiz ? col + i : col;
+      if (!inBounds(r, c)) return false;
+      var res = aiState.previousShots[key(r, c)];
+      if (res === 'miss' || res === 'sunk') return false;
+    }
+    return true;
+  }
+
+  function getBonus(aiState, size, row, col, horiz) {
+    var bonus = 0;
+    for (var i = 0; i < size; i++) { var r = horiz ? row : row+i, c = horiz ? col+i : col; if (aiState.previousShots[key(r, c)] === 'hit') bonus += 10; }
+    return bonus;
+  }
+
+  function boostHits(aiState, prob) {
+    var hits = aiState.lastHits;
+    var allSameRow = true, allSameCol = true;
+    if (hits.length >= 2) { for (var i = 1; i < hits.length; i++) { if (hits[i].row !== hits[0].row) allSameRow = false; if (hits[i].col !== hits[0].col) allSameCol = false; } }
+    else { allSameRow = false; allSameCol = false; }
+    for (var h = 0; h < hits.length; h++) {
+      var dirs;
+      if (allSameRow) dirs = [[0,-1],[0,1]]; else if (allSameCol) dirs = [[-1,0],[1,0]]; else dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+      for (var d = 0; d < dirs.length; d++) {
+        var nr = hits[h].row+dirs[d][0], nc = hits[h].col+dirs[d][1];
+        if (inBounds(nr, nc) && !aiState.previousShots[key(nr, nc)]) prob[nr][nc] += 50;
+      }
+    }
+    if (hits.length >= 2 && (allSameRow || allSameCol)) {
+      var minR=hits[0].row, maxR=hits[0].row, minC=hits[0].col, maxC=hits[0].col;
+      for (var j=1;j<hits.length;j++) { if(hits[j].row<minR)minR=hits[j].row; if(hits[j].row>maxR)maxR=hits[j].row; if(hits[j].col<minC)minC=hits[j].col; if(hits[j].col>maxC)maxC=hits[j].col; }
+      if (allSameRow) {
+        if (minC-1>=0 && !aiState.previousShots[key(minR,minC-1)]) prob[minR][minC-1] += 100;
+        if (maxC+1<BOARD && !aiState.previousShots[key(maxR,maxC+1)]) prob[maxR][maxC+1] += 100;
+      } else {
+        if (minR-1>=0 && !aiState.previousShots[key(minR-1,minC)]) prob[minR-1][minC] += 100;
+        if (maxR+1<BOARD && !aiState.previousShots[key(maxR+1,maxC)]) prob[maxR+1][maxC] += 100;
+      }
+    }
+  }
+
+  window.AI = { createState: createState, getShot: getShot, updateState: updateState, placeShips: placeShips };
+})();
+</script>
+
+<!-- ============================================================ -->
+<!-- SOUND EFFECTS -->
+<!-- ============================================================ -->
+<script>
+window.SFX = (function () {
+  var ctx = null, masterGain = null, volume = 0.5, muted = false, initialized = false, noiseBuffer = null;
+
+  function ensureContext() {
+    if (ctx && ctx.state === 'running') return true;
+    if (ctx && ctx.state === 'suspended') { ctx.resume(); return true; }
+    return initialized;
+  }
+
+  function init() {
+    if (initialized && ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = muted ? 0 : volume;
+    masterGain.connect(ctx.destination);
+    initialized = true;
+  }
+
+  function now() { return ctx ? ctx.currentTime : 0; }
+
+  function setVolume(level) {
+    volume = Math.max(0, Math.min(1, level));
+    if (masterGain && !muted) masterGain.gain.setValueAtTime(volume, now());
+  }
+
+  function setMuted(bool) {
+    muted = !!bool;
+    if (masterGain) masterGain.gain.setValueAtTime(muted ? 0 : volume, now());
+  }
+
+  function getNoiseBuffer() {
+    if (noiseBuffer && ctx) return noiseBuffer;
+    var length = ctx.sampleRate * 2;
+    noiseBuffer = ctx.createBuffer(1, length, ctx.sampleRate);
+    var data = noiseBuffer.getChannelData(0);
+    for (var i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+    return noiseBuffer;
+  }
+
+  function cleanup(nodes, dur) {
+    setTimeout(function () {
+      for (var i = 0; i < nodes.length; i++) {
+        try { if (nodes[i].stop) nodes[i].stop(); } catch (e) {}
+        try { if (nodes[i].disconnect) nodes[i].disconnect(); } catch (e) {}
+      }
+    }, (dur + 0.1) * 1000);
+  }
+
+  function hit() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 0.45, nodes = [];
+    var noise = ctx.createBufferSource(); noise.buffer = getNoiseBuffer();
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(800, t); bp.frequency.exponentialRampToValueAtTime(200, t + dur); bp.Q.value = 1.2;
+    var ng = ctx.createGain(); ng.gain.setValueAtTime(0.7, t); ng.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    noise.connect(bp); bp.connect(ng); ng.connect(masterGain); noise.start(t); noise.stop(t + dur); nodes.push(noise, bp, ng);
+    var bass = ctx.createOscillator(); bass.type = 'sine'; bass.frequency.setValueAtTime(80, t); bass.frequency.exponentialRampToValueAtTime(30, t + dur);
+    var bg = ctx.createGain(); bg.gain.setValueAtTime(0.5, t); bg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    bass.connect(bg); bg.connect(masterGain); bass.start(t); bass.stop(t + dur); nodes.push(bass, bg);
+    var crackle = ctx.createBufferSource(); crackle.buffer = getNoiseBuffer();
+    var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3000;
+    var cg = ctx.createGain(); cg.gain.setValueAtTime(0.3, t); cg.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+    crackle.connect(hp); hp.connect(cg); cg.connect(masterGain); crackle.start(t); crackle.stop(t + 0.1); nodes.push(crackle, hp, cg);
+    cleanup(nodes, dur);
+  }
+
+  function miss() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 0.5, nodes = [];
+    var noise = ctx.createBufferSource(); noise.buffer = getNoiseBuffer();
+    var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.setValueAtTime(600, t); hp.frequency.exponentialRampToValueAtTime(2000, t + dur);
+    var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(6000, t); lp.frequency.exponentialRampToValueAtTime(1500, t + dur);
+    var sg = ctx.createGain(); sg.gain.setValueAtTime(0.001, t); sg.gain.linearRampToValueAtTime(0.35, t + 0.04); sg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    noise.connect(hp); hp.connect(lp); lp.connect(sg); sg.connect(masterGain); noise.start(t); noise.stop(t + dur); nodes.push(noise, hp, lp, sg);
+    var thud = ctx.createOscillator(); thud.type = 'sine'; thud.frequency.setValueAtTime(120, t); thud.frequency.exponentialRampToValueAtTime(40, t + 0.15);
+    var tg = ctx.createGain(); tg.gain.setValueAtTime(0.2, t); tg.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    thud.connect(tg); tg.connect(masterGain); thud.start(t); thud.stop(t + 0.2); nodes.push(thud, tg);
+    cleanup(nodes, dur);
+  }
+
+  function sunk() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 1.8, nodes = [];
+    var rn = ctx.createBufferSource(); rn.buffer = getNoiseBuffer();
+    var rbp = ctx.createBiquadFilter(); rbp.type = 'bandpass'; rbp.frequency.setValueAtTime(300, t); rbp.frequency.exponentialRampToValueAtTime(60, t + 1.0); rbp.Q.value = 0.8;
+    var rg = ctx.createGain(); rg.gain.setValueAtTime(0.6, t); rg.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+    rn.connect(rbp); rbp.connect(rg); rg.connect(masterGain); rn.start(t); rn.stop(t + 1.3); nodes.push(rn, rbp, rg);
+    var bd = ctx.createOscillator(); bd.type = 'sine'; bd.frequency.setValueAtTime(100, t); bd.frequency.exponentialRampToValueAtTime(20, t + 1.0);
+    var bdg = ctx.createGain(); bdg.gain.setValueAtTime(0.5, t); bdg.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+    bd.connect(bdg); bdg.connect(masterGain); bd.start(t); bd.stop(t + 1.1); nodes.push(bd, bdg);
+    var creak = ctx.createOscillator(); creak.type = 'sawtooth'; creak.frequency.setValueAtTime(400, t + 0.3); creak.frequency.linearRampToValueAtTime(150, t + 1.2);
+    var cm = ctx.createOscillator(); cm.type = 'sine'; cm.frequency.value = 6;
+    var cmg = ctx.createGain(); cmg.gain.value = 50; cm.connect(cmg); cmg.connect(creak.frequency);
+    var cf = ctx.createBiquadFilter(); cf.type = 'bandpass'; cf.frequency.value = 800; cf.Q.value = 4;
+    var ckg = ctx.createGain(); ckg.gain.setValueAtTime(0.001, t); ckg.gain.linearRampToValueAtTime(0.15, t + 0.5); ckg.gain.linearRampToValueAtTime(0.1, t + 1.0); ckg.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+    creak.connect(cf); cf.connect(ckg); ckg.connect(masterGain); creak.start(t + 0.3); creak.stop(t + 1.5); cm.start(t + 0.3); cm.stop(t + 1.5); nodes.push(creak, cm, cmg, cf, ckg);
+    var bub = ctx.createOscillator(); bub.type = 'sine'; bub.frequency.setValueAtTime(600, t + 0.8); bub.frequency.exponentialRampToValueAtTime(200, t + dur);
+    var bm = ctx.createOscillator(); bm.type = 'sine'; bm.frequency.value = 15;
+    var bmg = ctx.createGain(); bmg.gain.value = 100; bm.connect(bmg); bmg.connect(bub.frequency);
+    var bubg = ctx.createGain(); bubg.gain.setValueAtTime(0.001, t + 0.8); bubg.gain.linearRampToValueAtTime(0.12, t + 1.0); bubg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    bub.connect(bubg); bubg.connect(masterGain); bub.start(t + 0.8); bub.stop(t + dur); bm.start(t + 0.8); bm.stop(t + dur); nodes.push(bub, bm, bmg, bubg);
+    cleanup(nodes, dur);
+  }
+
+  function place() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 0.2, nodes = [];
+    var click = ctx.createOscillator(); click.type = 'square'; click.frequency.setValueAtTime(1200, t); click.frequency.exponentialRampToValueAtTime(400, t + 0.03);
+    var cg = ctx.createGain(); cg.gain.setValueAtTime(0.25, t); cg.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    click.connect(cg); cg.connect(masterGain); click.start(t); click.stop(t + 0.06); nodes.push(click, cg);
+    var thud = ctx.createOscillator(); thud.type = 'sine'; thud.frequency.setValueAtTime(200, t); thud.frequency.exponentialRampToValueAtTime(80, t + 0.1);
+    var tg = ctx.createGain(); tg.gain.setValueAtTime(0.2, t); tg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    thud.connect(tg); tg.connect(masterGain); thud.start(t); thud.stop(t + dur); nodes.push(thud, tg);
+    cleanup(nodes, dur);
+  }
+
+  function victory() {
+    if (!ensureContext()) return;
+    var t = now(), freqs = [523.25, 659.25, 783.99, 1046.50], noteLen = 0.18, gap = 0.14, dur = freqs.length * (noteLen + gap) + 0.5, nodes = [];
+    for (var i = 0; i < freqs.length; i++) {
+      var start = t + i * (noteLen + gap);
+      var osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = freqs[i];
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4000;
+      var og = ctx.createGain(); og.gain.setValueAtTime(0.001, start); og.gain.linearRampToValueAtTime(0.2, start + 0.02); og.gain.setValueAtTime(0.2, start + noteLen * 0.6); og.gain.exponentialRampToValueAtTime(0.001, start + noteLen + 0.3);
+      osc.connect(lp); lp.connect(og); og.connect(masterGain); osc.start(start); osc.stop(start + noteLen + 0.35); nodes.push(osc, lp, og);
+    }
+    var cs = t + freqs.length * (noteLen + gap);
+    for (var j = 0; j < freqs.length; j++) {
+      var co = ctx.createOscillator(); co.type = 'triangle'; co.frequency.value = freqs[j];
+      var cg2 = ctx.createGain(); cg2.gain.setValueAtTime(0.001, cs); cg2.gain.linearRampToValueAtTime(0.1, cs + 0.05); cg2.gain.exponentialRampToValueAtTime(0.001, cs + 0.5);
+      co.connect(cg2); cg2.connect(masterGain); co.start(cs); co.stop(cs + 0.55); nodes.push(co, cg2);
+    }
+    cleanup(nodes, dur);
+  }
+
+  function defeat() {
+    if (!ensureContext()) return;
+    var t = now(), freqs = [523.25, 415.30, 349.23, 261.63], noteLen = 0.25, gap = 0.18, dur = freqs.length * (noteLen + gap) + 0.8, nodes = [];
+    for (var i = 0; i < freqs.length; i++) {
+      var start = t + i * (noteLen + gap);
+      var osc = ctx.createOscillator(); osc.type = 'triangle'; osc.frequency.value = freqs[i];
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1200 - i * 200;
+      var og = ctx.createGain(); og.gain.setValueAtTime(0.001, start); og.gain.linearRampToValueAtTime(0.2, start + 0.04); og.gain.setValueAtTime(0.18, start + noteLen * 0.5); og.gain.exponentialRampToValueAtTime(0.001, start + noteLen + 0.4);
+      osc.connect(lp); lp.connect(og); og.connect(masterGain); osc.start(start); osc.stop(start + noteLen + 0.45); nodes.push(osc, lp, og);
+      var sub = ctx.createOscillator(); sub.type = 'sine'; sub.frequency.value = freqs[i] / 2;
+      var sg = ctx.createGain(); sg.gain.setValueAtTime(0.001, start); sg.gain.linearRampToValueAtTime(0.08, start + 0.04); sg.gain.exponentialRampToValueAtTime(0.001, start + noteLen + 0.3);
+      sub.connect(sg); sg.connect(masterGain); sub.start(start); sub.stop(start + noteLen + 0.35); nodes.push(sub, sg);
+    }
+    var ds = t + freqs.length * (noteLen + gap);
+    var drone = ctx.createOscillator(); drone.type = 'sine'; drone.frequency.value = 130.81;
+    var dlp = ctx.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 400;
+    var dg = ctx.createGain(); dg.gain.setValueAtTime(0.001, ds); dg.gain.linearRampToValueAtTime(0.15, ds + 0.1); dg.gain.exponentialRampToValueAtTime(0.001, ds + 0.7);
+    drone.connect(dlp); dlp.connect(dg); dg.connect(masterGain); drone.start(ds); drone.stop(ds + 0.75); nodes.push(drone, dlp, dg);
+    cleanup(nodes, dur);
+  }
+
+  function hover() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 0.04, nodes = [];
+    var osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = 1800;
+    var og = ctx.createGain(); og.gain.setValueAtTime(0.05, t); og.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(og); og.connect(masterGain); osc.start(t); osc.stop(t + dur + 0.01); nodes.push(osc, og);
+    cleanup(nodes, dur);
+  }
+
+  return { init: init, hit: hit, miss: miss, sunk: sunk, place: place, victory: victory, defeat: defeat, hover: hover, setVolume: setVolume, setMuted: setMuted };
+})();
+</script>
+
+<!-- ============================================================ -->
+<!-- GLUE CODE — Wires Engine + AI + SFX + UI together -->
+<!-- ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
   // ----- DOM references -----
   var statusEl       = document.getElementById('status-message');
   var placementPanel = document.getElementById('placement-panel');
   var rotateBtn      = document.getElementById('rotate-btn');
+  var autoPlaceBtn   = document.getElementById('auto-place-btn');
   var playerGrid     = document.getElementById('player-grid');
   var enemyGrid      = document.getElementById('enemy-grid');
   var overlay        = document.getElementById('game-over-overlay');
+  var overBox        = document.getElementById('game-over-box');
   var overMsg        = document.getElementById('game-over-message');
+  var overStats      = document.getElementById('game-over-stats');
   var playAgainBtn   = document.getElementById('play-again-btn');
   var shipOptions    = document.querySelectorAll('.ship-option');
+  var difficultySelect = document.getElementById('difficulty-select');
+  var soundToggle    = document.getElementById('sound-toggle');
+  var playerFleetList = document.getElementById('player-fleet-list');
+  var enemyFleetList  = document.getElementById('enemy-fleet-list');
+  var logEntries     = document.getElementById('log-entries');
 
   // ----- Game state -----
   var phase = 'placement'; // 'placement' | 'battle' | 'gameover'
-  var playerBoard = createBoard();
-  var playerShips = [];
-  var enemyBoard  = null;
-  var enemyShips  = null;   // engine-format ships for processShot
-  var aiState     = null;
-  var horizontal  = true;   // current placement orientation
-  var locked      = false;  // prevent clicks during AI turn
+  var playerBoard, playerShips, enemyBoard, enemyShips, aiState;
+  var horizontal = true;
+  var locked = false;
+  var turnNumber = 0;
+  var playerShotCount = 0;
+  var playerHitCount = 0;
+  var enemyShotCount = 0;
+  var soundEnabled = true;
 
-  // Ship placement order — tracks which ship the player is placing
   var shipDefs = [
     { key: 'carrier',    name: 'Carrier',    size: 5 },
     { key: 'battleship', name: 'Battleship', size: 4 },
@@ -1116,16 +1759,51 @@ function getAIShot(aiState) {
     { key: 'destroyer',  name: 'Destroyer',  size: 2 }
   ];
   var currentShipIndex = 0;
-  var placedShips = {};  // key -> true
+  var placedShips = {};
+
+  // ----- Build grids programmatically -----
+  function buildGrid(gridEl) {
+    gridEl.innerHTML = '';
+    // Corner
+    var corner = document.createElement('div');
+    corner.className = 'label corner';
+    gridEl.appendChild(corner);
+    // Column headers A-J
+    for (var c = 0; c < 10; c++) {
+      var ch = document.createElement('div');
+      ch.className = 'label col-header';
+      ch.textContent = Engine.COLUMNS[c];
+      gridEl.appendChild(ch);
+    }
+    // Rows 1-10
+    for (var r = 0; r < 10; r++) {
+      var rh = document.createElement('div');
+      rh.className = 'label row-header';
+      rh.textContent = (r + 1).toString();
+      gridEl.appendChild(rh);
+      for (var c2 = 0; c2 < 10; c2++) {
+        var cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.setAttribute('data-row', r);
+        cell.setAttribute('data-col', c2);
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  buildGrid(playerGrid);
+  buildGrid(enemyGrid);
 
   // ----- Helpers -----
-
   function getCell(grid, row, col) {
     return grid.querySelector('.cell[data-row="' + row + '"][data-col="' + col + '"]');
   }
 
-  function setStatus(msg) {
+  function setStatus(msg, type) {
     statusEl.textContent = msg;
+    statusEl.className = '';
+    statusEl.id = 'status-message';
+    if (type) statusEl.classList.add('status-' + type);
   }
 
   function currentShipDef() {
@@ -1133,35 +1811,89 @@ function getAIShot(aiState) {
     return shipDefs[currentShipIndex];
   }
 
-  // Convert AI-format ships (with .cells) to engine-format (with .positions, .hits, .sunk)
-  function convertAIShipsToEngine(aiShipList) {
-    var engineShips = [];
-    for (var i = 0; i < aiShipList.length; i++) {
-      var s = aiShipList[i];
-      engineShips.push({
-        name: s.name,
-        size: s.size,
-        positions: s.cells.slice(), // same structure: [{row, col}, ...]
-        hits: 0,
-        sunk: false
-      });
-    }
-    return engineShips;
-  }
-
-  // Get cells that a ship would occupy starting at (row, col)
   function getShipCells(size, row, col, horiz) {
     var cells = [];
     for (var i = 0; i < size; i++) {
-      var r = horiz ? row : row + i;
-      var c = horiz ? col + i : col;
-      cells.push({ row: r, col: c });
+      cells.push({ row: horiz ? row : row + i, col: horiz ? col + i : col });
     }
     return cells;
   }
 
-  // ----- Placement preview -----
+  // ----- Sound -----
+  function initSound() {
+    if (soundEnabled) SFX.init();
+  }
 
+  soundToggle.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    soundToggle.textContent = 'Sound: ' + (soundEnabled ? 'ON' : 'OFF');
+    soundToggle.classList.toggle('muted', !soundEnabled);
+    SFX.setMuted(!soundEnabled);
+    if (soundEnabled) SFX.init();
+  });
+
+  // ----- Fleet status panels -----
+  function buildFleetStatus(container, ships, isEnemy) {
+    container.innerHTML = '';
+    for (var i = 0; i < ships.length; i++) {
+      var ship = ships[i];
+      var div = document.createElement('div');
+      div.className = 'ship-status';
+      div.setAttribute('data-ship', ship.name.toLowerCase());
+
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'ship-name';
+      nameSpan.textContent = ship.name;
+
+      var bar = document.createElement('div');
+      bar.className = 'health-bar';
+      var fill = document.createElement('div');
+      fill.className = 'health-bar-fill';
+      fill.style.width = '100%';
+      bar.appendChild(fill);
+
+      div.appendChild(nameSpan);
+      div.appendChild(bar);
+      container.appendChild(div);
+    }
+  }
+
+  function updateFleetStatus(container, ships) {
+    for (var i = 0; i < ships.length; i++) {
+      var ship = ships[i];
+      var div = container.querySelector('[data-ship="' + ship.name.toLowerCase() + '"]');
+      if (!div) continue;
+      var fill = div.querySelector('.health-bar-fill');
+      var remaining = ship.size - ship.hits;
+      var pct = (remaining / ship.size) * 100;
+      fill.style.width = pct + '%';
+
+      fill.className = 'health-bar-fill';
+      if (ship.sunk) {
+        fill.classList.add('dead');
+        div.classList.add('sunk-status');
+      } else if (pct <= 33) {
+        fill.classList.add('critical');
+      } else if (pct <= 66) {
+        fill.classList.add('warning');
+      }
+    }
+  }
+
+  // ----- Combat log -----
+  function addLog(msg, type) {
+    var entry = document.createElement('div');
+    entry.className = 'log-entry' + (type ? ' ' + type : '');
+    var turnSpan = document.createElement('span');
+    turnSpan.className = 'turn-number';
+    turnSpan.textContent = '[' + turnNumber + ']';
+    entry.appendChild(turnSpan);
+    entry.appendChild(document.createTextNode(' ' + msg));
+    logEntries.appendChild(entry);
+    logEntries.scrollTop = logEntries.scrollHeight;
+  }
+
+  // ----- Placement preview -----
   var previewCells = [];
 
   function clearPreview() {
@@ -1175,33 +1907,22 @@ function getAIShot(aiState) {
     clearPreview();
     var def = currentShipDef();
     if (!def) return;
-
-    var valid = canPlaceShip(playerBoard, def.size, row, col, horizontal);
+    var valid = Engine.canPlaceShip(playerBoard, def.size, row, col, horizontal);
     var cells = getShipCells(def.size, row, col, horizontal);
     var cls = valid ? 'preview-valid' : 'preview-invalid';
-
     for (var i = 0; i < cells.length; i++) {
-      var r = cells[i].row;
-      var c = cells[i].col;
-      if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+      var r = cells[i].row, c = cells[i].col;
+      if (r >= 0 && r < 10 && c >= 0 && c < 10) {
         var el = getCell(playerGrid, r, c);
-        if (el) {
-          el.classList.add(cls);
-          previewCells.push(el);
-        }
+        if (el) { el.classList.add(cls); previewCells.push(el); }
       }
     }
   }
 
   // ----- Ship option selection -----
-
   function selectShipOption(index) {
-    for (var i = 0; i < shipOptions.length; i++) {
-      shipOptions[i].classList.remove('active');
-    }
-    if (index < shipOptions.length) {
-      shipOptions[index].classList.add('active');
-    }
+    for (var i = 0; i < shipOptions.length; i++) shipOptions[i].classList.remove('active');
+    if (index < shipOptions.length) shipOptions[index].classList.add('active');
   }
 
   function markShipPlaced(index) {
@@ -1211,63 +1932,45 @@ function getAIShot(aiState) {
     }
   }
 
-  // Ship option click — select an unplaced ship
   for (var si = 0; si < shipOptions.length; si++) {
     (function (idx) {
       shipOptions[idx].addEventListener('click', function () {
         if (phase !== 'placement') return;
-        var def = shipDefs[idx];
-        if (placedShips[def.key]) return; // already placed
+        if (placedShips[shipDefs[idx].key]) return;
         currentShipIndex = idx;
         selectShipOption(idx);
-        setStatus('Place your ' + def.name + ' (' + def.size + ' cells)');
+        setStatus('Place your ' + shipDefs[idx].name + ' (' + shipDefs[idx].size + ' cells)');
       });
     })(si);
   }
 
-  // ----- Player grid: placement hover + click -----
-
-  var playerCells = playerGrid.querySelectorAll('.cell');
-
-  for (var pi = 0; pi < playerCells.length; pi++) {
+  // ----- Player grid: placement -----
+  var pCells = playerGrid.querySelectorAll('.cell');
+  for (var pi = 0; pi < pCells.length; pi++) {
     (function (cell) {
       cell.addEventListener('mouseenter', function () {
         if (phase !== 'placement') return;
-        var row = parseInt(cell.getAttribute('data-row'), 10);
-        var col = parseInt(cell.getAttribute('data-col'), 10);
-        showPreview(row, col);
+        showPreview(parseInt(cell.getAttribute('data-row'), 10), parseInt(cell.getAttribute('data-col'), 10));
       });
-
-      cell.addEventListener('mouseleave', function () {
-        if (phase !== 'placement') return;
-        clearPreview();
-      });
-
+      cell.addEventListener('mouseleave', function () { if (phase === 'placement') clearPreview(); });
       cell.addEventListener('click', function () {
         if (phase !== 'placement') return;
+        initSound();
         var def = currentShipDef();
         if (!def) return;
-
         var row = parseInt(cell.getAttribute('data-row'), 10);
         var col = parseInt(cell.getAttribute('data-col'), 10);
-
-        var result = placeShip(playerBoard, playerShips, def.name, def.size, row, col, horizontal);
-        if (result === null) return; // invalid
-
+        var result = Engine.placeShip(playerBoard, playerShips, def.name, def.size, row, col, horizontal);
+        if (result === null) return;
         clearPreview();
-
-        // Show ship on player grid
+        SFX.place();
         var cells = getShipCells(def.size, row, col, horizontal);
         for (var c = 0; c < cells.length; c++) {
           var el = getCell(playerGrid, cells[c].row, cells[c].col);
           if (el) el.classList.add('ship');
         }
-
-        // Mark placed
         placedShips[def.key] = true;
         markShipPlaced(currentShipIndex);
-
-        // Move to next unplaced ship
         var foundNext = false;
         for (var n = 0; n < shipDefs.length; n++) {
           if (!placedShips[shipDefs[n].key]) {
@@ -1278,187 +1981,223 @@ function getAIShot(aiState) {
             break;
           }
         }
-
-        if (!foundNext) {
-          // All ships placed — start battle
-          startBattle();
-        }
+        if (!foundNext) startBattle();
       });
-    })(playerCells[pi]);
+    })(pCells[pi]);
   }
 
   // ----- Rotate -----
-
   rotateBtn.addEventListener('click', function () {
     horizontal = !horizontal;
-    rotateBtn.textContent = horizontal ? 'Rotate (R) — Horizontal' : 'Rotate (R) — Vertical';
+    rotateBtn.textContent = horizontal ? 'Rotate (R)' : 'Rotate (R) \u2014 Vertical';
   });
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'r' || e.key === 'R') {
-      if (phase === 'placement') {
-        horizontal = !horizontal;
-        rotateBtn.textContent = horizontal ? 'Rotate (R) — Horizontal' : 'Rotate (R) — Vertical';
-      }
+    if ((e.key === 'r' || e.key === 'R') && phase === 'placement') {
+      horizontal = !horizontal;
+      rotateBtn.textContent = horizontal ? 'Rotate (R)' : 'Rotate (R) \u2014 Vertical';
     }
   });
 
-  // ----- Battle phase -----
+  // ----- Auto Place -----
+  autoPlaceBtn.addEventListener('click', function () {
+    if (phase !== 'placement') return;
+    initSound();
+    // Reset board
+    playerBoard = Engine.createBoard();
+    playerShips = [];
+    placedShips = {};
+    // Clear visual
+    var allCells = playerGrid.querySelectorAll('.cell');
+    for (var i = 0; i < allCells.length; i++) allCells[i].classList.remove('ship');
+    // Random place
+    var result = Engine.randomPlacement();
+    playerBoard = result.board;
+    playerShips = result.ships;
+    // Show ships
+    for (var s = 0; s < playerShips.length; s++) {
+      var ship = playerShips[s];
+      for (var p = 0; p < ship.positions.length; p++) {
+        var el = getCell(playerGrid, ship.positions[p].row, ship.positions[p].col);
+        if (el) el.classList.add('ship');
+      }
+      // Mark option as placed
+      for (var d = 0; d < shipDefs.length; d++) {
+        if (shipDefs[d].name === ship.name) { placedShips[shipDefs[d].key] = true; markShipPlaced(d); break; }
+      }
+    }
+    SFX.place();
+    startBattle();
+  });
 
+  // ----- Battle phase -----
   function startBattle() {
     phase = 'battle';
-
-    // Hide placement panel
     placementPanel.classList.add('hidden');
-
-    // AI places its ships
-    var aiResult = aiPlaceShips(null, null);
+    var difficulty = difficultySelect.value;
+    var aiResult = AI.placeShips(difficulty);
     enemyBoard = aiResult.board;
-    enemyShips = convertAIShipsToEngine(aiResult.ships);
+    enemyShips = aiResult.ships;
+    aiState = AI.createState(difficulty);
+    turnNumber = 1;
+    playerShotCount = 0;
+    playerHitCount = 0;
+    enemyShotCount = 0;
 
-    // Create AI state
-    aiState = createAIState();
+    buildFleetStatus(playerFleetList, playerShips, false);
+    buildFleetStatus(enemyFleetList, enemyShips, true);
 
-    setStatus("Your turn \u2014 fire at enemy waters!");
+    setStatus("Turn " + turnNumber + " \u2014 Fire at enemy waters!");
+    addLog('Battle stations! Difficulty: ' + difficulty.charAt(0).toUpperCase() + difficulty.slice(1), '');
   }
 
   // ----- Enemy grid: battle clicks -----
-
-  var enemyCells = enemyGrid.querySelectorAll('.cell');
-
-  for (var ei = 0; ei < enemyCells.length; ei++) {
+  var eCells = enemyGrid.querySelectorAll('.cell');
+  for (var ei = 0; ei < eCells.length; ei++) {
     (function (cell) {
+      cell.addEventListener('mouseenter', function () {
+        if (phase === 'battle' && !locked && !cell.classList.contains('hit') && !cell.classList.contains('miss') && !cell.classList.contains('sunk')) {
+          SFX.hover();
+        }
+      });
       cell.addEventListener('click', function () {
-        if (phase !== 'battle') return;
-        if (locked) return;
-
+        if (phase !== 'battle' || locked) return;
         var row = parseInt(cell.getAttribute('data-row'), 10);
         var col = parseInt(cell.getAttribute('data-col'), 10);
-
-        // Prevent clicking already-shot cells
-        if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) {
-          return;
-        }
-
+        if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) return;
         locked = true;
+        playerShotCount++;
 
-        // Player fires
-        var shot = processShot(enemyBoard, enemyShips, row, col);
+        var shot = Engine.processShot(enemyBoard, enemyShips, row, col);
+        if (shot.alreadyFired) { locked = false; playerShotCount--; return; }
 
-        if (shot.alreadyFired) {
-          locked = false;
-          return;
-        }
+        var coord = Engine.formatCoord(row, col);
 
-        // Update enemy grid visually
         if (shot.result === 'sunk') {
-          // Mark ALL cells of the sunk ship
-          var sunkShip = getShipAt(enemyShips, row, col);
+          SFX.sunk();
+          var sunkShip = Engine.getShipAt(enemyShips, row, col);
           if (sunkShip) {
             for (var p = 0; p < sunkShip.positions.length; p++) {
-              var pos = sunkShip.positions[p];
-              var sunkCell = getCell(enemyGrid, pos.row, pos.col);
-              if (sunkCell) {
-                sunkCell.classList.remove('hit', 'miss');
-                sunkCell.classList.add('sunk');
-              }
+              var sunkCell = getCell(enemyGrid, sunkShip.positions[p].row, sunkShip.positions[p].col);
+              if (sunkCell) { sunkCell.classList.remove('hit', 'miss'); sunkCell.classList.add('sunk'); }
             }
           }
-          setStatus("You sunk their " + shot.shipName + "!");
+          playerHitCount++;
+          setStatus("You sunk their " + shot.shipName + "!", 'sunk');
+          addLog('You fired ' + coord + ' \u2014 SUNK ' + shot.shipName + '!', 'sunk');
         } else if (shot.result === 'hit') {
+          SFX.hit();
           cell.classList.add('hit');
-          setStatus("Hit!");
+          playerHitCount++;
+          setStatus("Hit at " + coord + "!", 'hit');
+          addLog('You fired ' + coord + ' \u2014 HIT!', 'hit');
         } else {
+          SFX.miss();
           cell.classList.add('miss');
-          setStatus("Miss!");
+          setStatus("Miss at " + coord, 'miss');
+          addLog('You fired ' + coord + ' \u2014 miss', 'miss');
         }
 
-        // Check win
-        if (isGameOver(enemyShips)) {
+        updateFleetStatus(enemyFleetList, enemyShips);
+
+        if (Engine.isGameOver(enemyShips)) {
           phase = 'gameover';
           showGameOver(true);
           return;
         }
 
-        // AI turn after delay
-        setTimeout(function () {
-          doAITurn();
-        }, 500);
+        setTimeout(function () { doAITurn(); }, 600);
       });
-    })(enemyCells[ei]);
+    })(eCells[ei]);
   }
 
   // ----- AI turn -----
-
   function doAITurn() {
-    var target = getAIShot(aiState);
-    var shot = processShot(playerBoard, playerShips, target.row, target.col);
+    var target = AI.getShot(aiState);
+    var shot = Engine.processShot(playerBoard, playerShips, target.row, target.col);
+    AI.updateState(aiState, target.row, target.col, shot.result);
+    enemyShotCount++;
 
-    // Update AI state
-    updateAIState(aiState, target.row, target.col, shot.result);
-
-    // Update player grid visually
+    var coord = Engine.formatCoord(target.row, target.col);
     var cell = getCell(playerGrid, target.row, target.col);
 
     if (shot.result === 'sunk') {
-      var sunkShip = getShipAt(playerShips, target.row, target.col);
+      SFX.sunk();
+      var sunkShip = Engine.getShipAt(playerShips, target.row, target.col);
       if (sunkShip) {
         for (var p = 0; p < sunkShip.positions.length; p++) {
-          var pos = sunkShip.positions[p];
-          var sunkCell = getCell(playerGrid, pos.row, pos.col);
-          if (sunkCell) {
-            sunkCell.classList.remove('ship', 'hit', 'miss');
-            sunkCell.classList.add('sunk');
-          }
+          var sunkCell = getCell(playerGrid, sunkShip.positions[p].row, sunkShip.positions[p].col);
+          if (sunkCell) { sunkCell.classList.remove('ship', 'hit', 'miss'); sunkCell.classList.add('sunk'); }
         }
       }
-      setStatus("Enemy sunk your " + shot.shipName + "!");
+      setStatus("Enemy sunk your " + shot.shipName + "!", 'sunk');
+      addLog('Enemy fired ' + coord + ' \u2014 SUNK your ' + shot.shipName + '!', 'sunk');
     } else if (shot.result === 'hit') {
-      if (cell) {
-        cell.classList.remove('ship');
-        cell.classList.add('hit');
-      }
-      setStatus("Enemy hit your " + shot.shipName + "!");
+      SFX.hit();
+      if (cell) { cell.classList.remove('ship'); cell.classList.add('hit'); }
+      setStatus("Enemy hit your " + shot.shipName + "!", 'hit');
+      addLog('Enemy fired ' + coord + ' \u2014 HIT your ' + shot.shipName + '!', 'hit');
     } else {
-      if (cell) {
-        cell.classList.add('miss');
-      }
-      setStatus("Enemy missed!");
+      SFX.miss();
+      if (cell) cell.classList.add('miss');
+      setStatus("Enemy missed at " + coord, 'miss');
+      addLog('Enemy fired ' + coord + ' \u2014 miss', 'miss');
     }
 
-    // Check loss
-    if (isGameOver(playerShips)) {
+    updateFleetStatus(playerFleetList, playerShips);
+
+    if (Engine.isGameOver(playerShips)) {
       phase = 'gameover';
       showGameOver(false);
       return;
     }
 
-    // Unlock for player's next turn
+    turnNumber++;
     setTimeout(function () {
       locked = false;
-      setStatus("Your turn \u2014 fire at enemy waters!");
-    }, 300);
+      setStatus("Turn " + turnNumber + " \u2014 Fire at enemy waters!");
+    }, 400);
   }
 
   // ----- Game over -----
-
   function showGameOver(playerWon) {
     locked = true;
+
     if (playerWon) {
-      overMsg.textContent = "Victory! You sank the enemy fleet!";
+      SFX.victory();
+      overMsg.textContent = "Victory!";
+      overBox.className = 'game-over-box victory';
     } else {
-      overMsg.textContent = "Defeat! Your fleet has been destroyed!";
+      SFX.defeat();
+      overMsg.textContent = "Defeat!";
+      overBox.className = 'game-over-box defeat';
     }
+
+    var accuracy = playerShotCount > 0 ? Math.round((playerHitCount / playerShotCount) * 100) : 0;
+    var enemySunk = 0;
+    for (var i = 0; i < enemyShips.length; i++) { if (enemyShips[i].sunk) enemySunk++; }
+    var playerSunk = 0;
+    for (var j = 0; j < playerShips.length; j++) { if (playerShips[j].sunk) playerSunk++; }
+
+    overStats.innerHTML =
+      '<div class="stat-row"><span class="stat-label">Turns</span><span class="stat-value">' + turnNumber + '</span></div>' +
+      '<div class="stat-row"><span class="stat-label">Your Shots</span><span class="stat-value">' + playerShotCount + '</span></div>' +
+      '<div class="stat-row"><span class="stat-label">Accuracy</span><span class="stat-value">' + accuracy + '%</span></div>' +
+      '<div class="stat-row"><span class="stat-label">Enemy Ships Sunk</span><span class="stat-value">' + enemySunk + '/5</span></div>' +
+      '<div class="stat-row"><span class="stat-label">Your Ships Lost</span><span class="stat-value">' + playerSunk + '/5</span></div>' +
+      '<div class="stat-row"><span class="stat-label">Difficulty</span><span class="stat-value">' + difficultySelect.value.charAt(0).toUpperCase() + difficultySelect.value.slice(1) + '</span></div>';
+
     overlay.classList.add('visible');
   }
 
-  playAgainBtn.addEventListener('click', function () {
-    location.reload();
-  });
+  playAgainBtn.addEventListener('click', function () { location.reload(); });
 
   // ----- Init -----
+  playerBoard = Engine.createBoard();
+  playerShips = [];
   setStatus('Place your ' + shipDefs[0].name + ' (' + shipDefs[0].size + ' cells)');
 })();
-  </script>
+</script>
+
 </body>
 </html>
