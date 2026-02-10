@@ -12,14 +12,8 @@ Nelson is a Claude Code skill for coordinating agent work using Royal Navy termi
     admiralty-templates.md — Reusable templates (orders, plans, logs)
     damage-control.md   — Error recovery and escalation procedures
     squadron-composition.md — Mode selection & team sizing rules
-    standing-orders/    — Individual anti-pattern files, loaded per-step
-      admiral-at-the-helm.md
-      becalmed-fleet.md
-      crew-without-canvas.md
-      drifting-anchorage.md
-      press-ganged-navigator.md
-      split-keel.md
-      unclassified-engagement.md
+    standing-orders.md  — Index routing to individual anti-pattern files
+    standing-orders/    — One file per anti-pattern, loaded on demand
   agents/               — Agent interface definitions
 demos/                  — Example applications built with Nelson
 ```
