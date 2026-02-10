@@ -186,6 +186,13 @@ Ships are named from real Royal Navy warships, matched roughly to task weight: f
 
 Squadron size caps at 10 squadron-level agents (admiral, captains, red-cell navigator). Crew are additional — up to 4 per ship. If a task needs more crew, split it into two ships.
 
+Here's an example of the crew in action: we create four captains. Two of the captains are single-crew (minimum, since captains don't do the work themselves) and two of them are two-crew. So we have 11 agents working together in total:
+
+
+https://github.com/user-attachments/assets/f3bafd06-790e-44a0-9061-7d1fd666b445
+
+
+
 ### Action stations (risk tiers)
 
 Every task is classified into a risk tier before execution. Higher tiers require more controls:
