@@ -1,6 +1,6 @@
 # Escalation: Chain of Command
 
-Escalation flows upward: Captain to Admiral to Admiralty (human).
+Escalation flows upward: Crew to Captain to Admiral to Admiralty (human).
 
 ## Triggers
 
@@ -26,6 +26,7 @@ Escalation flows upward: Captain to Admiral to Admiralty (human).
 
 ## Authority Boundaries
 
+- **Crew member**: Can resolve issues within their sub-task scope. Must escalate anything affecting other crew members or the ship's deliverable to captain.
 - **Captain**: Can resolve issues within their own task scope. Must escalate anything affecting other tasks, shared resources, or mission scope.
 - **Admiral**: Can re-assign tasks, replace agents, adjust timelines, elevate action stations, and descope within the original sailing orders. Must escalate scope changes, budget extensions, and abort decisions.
 - **Admiralty (human)**: Final authority on scope, budget, and abort. All irreversible or high-blast-radius decisions require Admiralty confirmation.

@@ -11,6 +11,7 @@ Nelson is a Claude Code skill for coordinating agent work using Royal Navy termi
     action-stations.md    — Risk tier definitions (Station 0–3)
     admiralty-templates.md — Index routing to individual template files
     admiralty-templates/   — One file per template, loaded on demand
+    crew-roles.md         — Crew role definitions, ship names & sizing rules
     damage-control.md     — Index routing to individual procedure files
     damage-control/       — One file per procedure, loaded on demand
     squadron-composition.md — Mode selection & team sizing rules

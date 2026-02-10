@@ -26,8 +26,11 @@ Use `references/admiralty-templates.md` when the user does not provide structure
 - Default to `1 admiral + 3-6 captains`.
 - Add `1 red-cell navigator` for medium/high threat work.
 - Do not exceed 10 total agents.
+- Assign each captain a ship name from `references/crew-roles.md` matching task weight (frigate for general, destroyer for high-risk, patrol vessel for small, flagship for critical-path, submarine for research).
+- Captain decides crew composition per ship: 0 crew for atomic tasks, 1-2 for typical, 3 for complex, 4 max for multi-part. Use `references/crew-roles.md` for role selection.
 
 Use `references/squadron-composition.md` for selection rules.
+Use `references/crew-roles.md` for ship naming and crew composition.
 Consult `references/standing-orders.md` before forming the squadron.
 
 ## 3. Draft Battle Plan
@@ -36,8 +39,9 @@ Consult `references/standing-orders.md` before forming the squadron.
 - Assign owner for each task and explicit dependencies.
 - Assign file ownership when implementation touches code.
 - Keep one task in progress per agent unless the mission explicitly requires multitasking.
+- For each task with crew, include a ship manifest: ship name, captain, crew roles with sub-tasks, and sub-task sequence.
 
-Use `references/admiralty-templates.md` for the battle plan template.
+Use `references/admiralty-templates.md` for the battle plan and ship manifest templates.
 Consult `references/standing-orders.md` when assigning files or if scope is unclear.
 
 ## 4. Run Quarterdeck Rhythm
@@ -46,7 +50,7 @@ Consult `references/standing-orders.md` when assigning files or if scope is uncl
 - Run checkpoints at fixed cadence (for example every 15-30 minutes):
 - Update progress by task state: `pending`, `in_progress`, `completed`.
 - Identify blockers and choose a concrete next action.
-- Track burn against token/time budget.
+- Track burn against token/time budget at both squadron and ship level.
 - Re-scope early when a task drifts from mission metric.
 - When a mission encounters difficulties, consult `references/damage-control.md` for recovery and escalation procedures.
 

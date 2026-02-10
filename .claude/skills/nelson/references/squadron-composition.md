@@ -26,11 +26,13 @@ Choose the first condition that matches.
 - Large mission: `1 admiral + 6-7 captains`.
 - Add `1 red-cell navigator` at medium/high threat.
 - Keep one admiral only.
+- Crew are additional subagents per ship (0-4 per captain). See `references/crew-roles.md` for crew composition rules.
 
 ## Role Guide
 
 - `admiral`: Defines sailing orders, delegates, tracks dependencies, resolves blockers, final synthesis.
-- `captain`: Owns assigned task and artifacts.
+- `captain`: Commands a ship. Breaks task into sub-tasks, crews roles, coordinates crew, verifies outputs. Implements directly only when the task is atomic (0 crew).
+  - Crew roles: Executive Officer (XO), Principal Warfare Officer (PWO), Navigating Officer (NO), Marine Engineering Officer (MEO), Weapon Engineering Officer (WEO), Logistics Officer (LOGO), Coxswain (COX). See `references/crew-roles.md` for role definitions and crewing rules.
 - `red-cell navigator`: Challenges assumptions, validates outputs, checks rollback readiness.
 
 ## Anti-Patterns
