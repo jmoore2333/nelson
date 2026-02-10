@@ -25,9 +25,9 @@ Use `references/admiralty-templates.md` when the user does not provide structure
 - Set team size from mission complexity:
 - Default to `1 admiral + 3-6 captains`.
 - Add `1 red-cell navigator` for medium/high threat work.
-- Do not exceed 10 total agents.
+- Do not exceed 10 squadron-level agents (admiral, captains, red-cell navigator). Crew are additional.
 - Assign each captain a ship name from `references/crew-roles.md` matching task weight (frigate for general, destroyer for high-risk, patrol vessel for small, flagship for critical-path, submarine for research).
-- Captain decides crew composition per ship: 0 crew for atomic tasks, 1-2 for typical, 3 for complex, 4 max for multi-part. Use `references/crew-roles.md` for role selection.
+- Captain decides crew composition per ship using the crew-or-direct decision tree in `references/crew-roles.md`.
 
 Use `references/squadron-composition.md` for selection rules.
 Use `references/crew-roles.md` for ship naming and crew composition.
@@ -39,9 +39,9 @@ Consult `references/standing-orders.md` before forming the squadron.
 - Assign owner for each task and explicit dependencies.
 - Assign file ownership when implementation touches code.
 - Keep one task in progress per agent unless the mission explicitly requires multitasking.
-- For each task with crew, include a ship manifest: ship name, captain, crew roles with sub-tasks, and sub-task sequence.
+- For each captain's task, include a ship manifest. If crew are mustered, list crew roles with sub-tasks and sequence. If the captain implements directly (0 crew), note "Captain implements directly."
 
-Use `references/admiralty-templates.md` for the battle plan and ship manifest templates.
+Use `references/admiralty-templates.md` for the battle plan and ship manifest template.
 Consult `references/standing-orders.md` when assigning files or if scope is unclear.
 
 ## 4. Run Quarterdeck Rhythm
@@ -50,7 +50,8 @@ Consult `references/standing-orders.md` when assigning files or if scope is uncl
 - Run checkpoints at fixed cadence (for example every 15-30 minutes):
 - Update progress by task state: `pending`, `in_progress`, `completed`.
 - Identify blockers and choose a concrete next action.
-- Track burn against token/time budget at both squadron and ship level.
+- Confirm each crew member has active sub-tasks; flag idle crew or role mismatches.
+- Track burn against token/time budget.
 - Re-scope early when a task drifts from mission metric.
 - When a mission encounters difficulties, consult `references/damage-control.md` for recovery and escalation procedures.
 
@@ -68,12 +69,13 @@ Consult `references/standing-orders.md` if admiral is doing implementation or ta
 - Task completion.
 - Agent idle with unverified outputs.
 - Before final synthesis.
+- For crewed tasks, verify crew outputs align with role boundaries (consult `references/crew-roles.md` and `references/standing-orders.md` if role violations are detected).
 
 Consult `references/standing-orders.md` if tasks lack a tier or red-cell is assigned implementation work.
 
 ## 6. Stand Down And Log Action
 
-- Stop or archive agent sessions.
+- Stop or archive all agent sessions, including crew.
 - Produce captain's log:
 - Decisions and rationale.
 - Diffs or artifacts.

@@ -4,8 +4,8 @@
 Task ID:
 - Name:
 - Owner:
-- Ship:
-- Crew manifest:
+- Ship (if crewed):
+- Crew manifest (if crewed):
 - Deliverable:
 - Dependencies:
 - Station tier (0-3):

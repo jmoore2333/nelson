@@ -176,15 +176,15 @@ Nelson uses a three-tier hierarchy. The admiral coordinates captains, each capta
 | Principal Warfare Officer | PWO | Core implementation | Almost always (default doer) |
 | Navigating Officer | NO | Codebase research & exploration | Unfamiliar code, large codebase |
 | Marine Engineering Officer | MEO | Testing & validation | Station 1+ or non-trivial verification |
-| Weapon Engineering Officer | WEO | Config & infrastructure | Significant config/infra work |
-| Logistics Officer | LOGO | Docs & dependency management | Docs as deliverable, dep management |
+| Weapon Engineering Officer | WEO | Config, infrastructure & systems integration | Significant config/infra work |
+| Logistics Officer | LOGO | Documentation & dependency management | Docs as deliverable, dep management |
 | Coxswain | COX | Standards review & quality | Station 1+ with established conventions |
 
 NO and COX are read-only — they report findings but never modify files.
 
 Ships are named from real Royal Navy warships, matched roughly to task weight: frigates for general-purpose, destroyers for high-tempo, patrol vessels for small tasks, historic flagships for critical-path, and submarines for research.
 
-Squadron size caps at 10 agents. Crew size caps at 4 per ship — if a task needs more, split it into two ships.
+Squadron size caps at 10 squadron-level agents (admiral, captains, red-cell navigator). Crew are additional — up to 4 per ship. If a task needs more crew, split it into two ships.
 
 ### Action stations (risk tiers)
 

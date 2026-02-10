@@ -3,7 +3,7 @@
 Use when a ship's crew is consuming disproportionate tokens or time relative to its task weight.
 
 1. Captain pauses all crew activity on the ship.
-2. Captain reviews each crew member's progress against their assigned sub-task.
+2. Captain reviews each crew member's progress against their assigned sub-task and estimated budget.
 3. Captain identifies the source of overrun: scope creep, blocked crew member, or mismatched role assignment.
 4. Captain takes corrective action:
    - If scope creep: descope the sub-task to its original definition.

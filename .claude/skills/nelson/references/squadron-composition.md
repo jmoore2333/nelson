@@ -19,14 +19,14 @@ Choose the first condition that matches.
 | Parallel implementation with dependencies | `agent-team` | Supports teammate-to-teammate coordination |
 | High threat or high blast radius | `agent-team` + red-cell navigator | Adds explicit control points |
 
-## Team Sizing (up to 10 total)
+## Team Sizing
 
 - Small mission: `1 admiral + 2-3 captains`.
 - Medium mission: `1 admiral + 4-5 captains`.
 - Large mission: `1 admiral + 6-7 captains`.
 - Add `1 red-cell navigator` at medium/high threat.
 - Keep one admiral only.
-- Crew are additional subagents per ship (0-4 per captain). See `references/crew-roles.md` for crew composition rules.
+- Squadron cap: 10 squadron-level agents (admiral, captains, red-cell navigator). Crew are additional — up to 4 per captain, governed by `references/crew-roles.md`.
 
 ## Role Guide
 
