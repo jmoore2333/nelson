@@ -1,7 +1,7 @@
 # Nelson
 
 <p align="center">
-  <img src="1024px-Young_Nelson-min.jpg" alt="Captain Horatio Nelson" width="500">
+  <img src="docs/images/1024px-Young_Nelson-min.jpg" alt="Captain Horatio Nelson" width="500">
   <br>
   <em>Captain Horatio Nelson — John Francis Rigaud, 1781. Image: Wikimedia Commons</em>
 </p>
@@ -122,7 +122,7 @@ Scope:
 ## How it works
 
 <p align="center">
-  <img src="HMP_RNM_1973_76-001.jpg" alt="HMS Victory anchored off the Isle of Wight" width="700">
+  <img src="docs/images/HMP_RNM_1973_76-001.jpg" alt="HMS Victory anchored off the Isle of Wight" width="700">
   <br>
   <em>HMS Victory anchored off the Isle of Wight — John Wilson Carmichael (1799–1868), National Museum of the Royal Navy, Portsmouth</em>
 </p>
