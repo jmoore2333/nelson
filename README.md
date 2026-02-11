@@ -10,13 +10,7 @@ A Claude Code skill for coordinating agent work based on the Royal Navy. It prov
 
 ## What it does
 
-
-
-
 https://github.com/user-attachments/assets/2468679d-39f5-4efb-9d93-43d43eee8907
-
-
-
 
 Nelson gives Claude a six-step operational framework for tackling complex missions:
 
@@ -188,10 +182,7 @@ Squadron size caps at 10 squadron-level agents (admiral, captains, red-cell navi
 
 Here's an example of the crew in action: we create four captains. Two of the captains are single-crew (minimum, since captains don't do the work themselves) and two of them are two-crew. So we have 11 agents working together in total:
 
-
 https://github.com/user-attachments/assets/f3bafd06-790e-44a0-9061-7d1fd666b445
-
-
 
 ### Action stations (risk tiers)
 
@@ -205,7 +196,6 @@ Every task is classified into a risk tier before execution. Higher tiers require
 | 3 | Trafalgar | Irreversible actions, regulated/safety-sensitive | Minimal scope, human confirmation, two-step verification, contingency plan |
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/2d0bf2ea-3f26-4751-9faa-71eca6be07b3" />
-
 
 Tasks at Station 1 and above also run a **failure-mode checklist**:
 
@@ -227,7 +217,6 @@ The skill includes structured templates for consistent output across missions:
 - **Captain's Log** — Final report with delivered artifacts, decisions, validation evidence, and follow-ups
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/5955341c-a251-4e05-b0ed-61f424181201" />
-
 
 ## Skill file structure
 
@@ -297,10 +286,7 @@ Edit `references/squadron-composition.md` to adjust the decision matrix or defau
 
 This project is not associated with, endorsed by, or affiliated with the British Royal Navy or the UK Ministry of Defence. All Royal Navy terminology and references are used purely as a creative framework for organising software development tasks.
 
-
 <img width="600" height="200" alt="knot" src="https://github.com/user-attachments/assets/3b8b242b-9e24-43a1-a25f-7864b62acbd1" />
-
-
 
 ## License
 
