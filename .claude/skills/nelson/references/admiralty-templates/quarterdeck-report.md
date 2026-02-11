@@ -22,6 +22,9 @@ Risk updates:
 - new/changed risks:
 - mitigation:
 
+Signal flag (if any):
+- recognition:
+
 Admiral decision:
 - continue / rescope / stop:
 - rationale:

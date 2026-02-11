@@ -27,7 +27,11 @@ Follow-ups:
 - owner:
 - due date:
 
+Mentioned in Despatches:
+- agent:
+- contribution:
+
 Reusable patterns:
-- worked well:
-- avoid next time:
+- adopt:
+- avoid:
 ```
