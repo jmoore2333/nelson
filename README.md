@@ -124,8 +124,6 @@ Scope:
 - In scope: src/api/ and tests/api/
 - Out of scope: Frontend error handling
 ```
-<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/7ce5eb31-a57b-477b-a5d1-8a6f1ff0c780" />
-
 
 ## How it works
 
@@ -299,7 +297,9 @@ Edit `references/squadron-composition.md` to adjust the decision matrix or defau
 
 This project is not associated with, endorsed by, or affiliated with the British Royal Navy or the UK Ministry of Defence. All Royal Navy terminology and references are used purely as a creative framework for organising software development tasks.
 
-![knot](https://github.com/user-attachments/assets/c38ae49c-558c-490b-8df2-f7415c0d6e20)
+
+<img width="600" height="200" alt="knot" src="https://github.com/user-attachments/assets/3b8b242b-9e24-43a1-a25f-7864b62acbd1" />
+
 
 
 ## License
