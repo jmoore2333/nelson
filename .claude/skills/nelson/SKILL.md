@@ -33,8 +33,6 @@ You MUST read `references/squadron-composition.md` for selection rules.
 You MUST read `references/crew-roles.md` for ship naming and crew composition.
 You MUST consult `references/standing-orders.md` before forming the squadron.
 
-**Crew Briefing:** When spawning each teammate via `Task()`, you MUST include a crew briefing using the template from `references/admiralty-templates.md`. Teammates do NOT inherit the lead's conversation context — they start with a clean slate and need explicit mission context to operate independently.
-
 ## 3. Draft Battle Plan
 
 - Split mission into independent tasks with clear deliverables.
@@ -47,6 +45,8 @@ You MUST read `references/admiralty-templates.md` for the battle plan and ship m
 You MUST consult `references/standing-orders.md` when assigning files or if scope is unclear.
 
 **Before proceeding to Step 4:** Verify sailing orders exist, squadron is formed, and every task has an owner, deliverable, and action station tier.
+
+**Crew Briefing:** When spawning each teammate via `Task()`, you MUST include a crew briefing using the template from `references/admiralty-templates.md`. Teammates do NOT inherit the lead's conversation context — they start with a clean slate and need explicit mission context to operate independently.
 
 ## 4. Run Quarterdeck Rhythm
 
