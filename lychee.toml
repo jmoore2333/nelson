@@ -2,6 +2,3 @@ exclude_path = [".venv", "demos"]
 
 # Only check local file references — keeps CI fast and deterministic
 mode = "offline"
-
-# Accept image files as valid link targets
-accept = ["*.jpg", "*.png"]
