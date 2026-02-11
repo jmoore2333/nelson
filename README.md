@@ -124,6 +124,8 @@ Scope:
 - In scope: src/api/ and tests/api/
 - Out of scope: Frontend error handling
 ```
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/7ce5eb31-a57b-477b-a5d1-8a6f1ff0c780" />
+
 
 ## How it works
 
@@ -204,6 +206,9 @@ Every task is classified into a risk tier before execution. Higher tiers require
 | 2 | Action | Security/compliance/data integrity implications | Red-cell review, failure-mode checklist, go/no-go checkpoint |
 | 3 | Trafalgar | Irreversible actions, regulated/safety-sensitive | Minimal scope, human confirmation, two-step verification, contingency plan |
 
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/2d0bf2ea-3f26-4751-9faa-71eca6be07b3" />
+
+
 Tasks at Station 1 and above also run a **failure-mode checklist**:
 
 - What could fail in production?
@@ -222,6 +227,9 @@ The skill includes structured templates for consistent output across missions:
 - **Quarterdeck Report** — Checkpoint status with progress, blockers, budget tracking, and risk updates
 - **Red-Cell Review** — Adversarial review with challenge summary, checks, and recommendation
 - **Captain's Log** — Final report with delivered artifacts, decisions, validation evidence, and follow-ups
+
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/5955341c-a251-4e05-b0ed-61f424181201" />
+
 
 ## Skill file structure
 
@@ -290,6 +298,9 @@ Edit `references/squadron-composition.md` to adjust the decision matrix or defau
 ## Disclaimer
 
 This project is not associated with, endorsed by, or affiliated with the British Royal Navy or the UK Ministry of Defence. All Royal Navy terminology and references are used purely as a creative framework for organising software development tasks.
+
+![knot](https://github.com/user-attachments/assets/c38ae49c-558c-490b-8df2-f7415c0d6e20)
+
 
 ## License
 
