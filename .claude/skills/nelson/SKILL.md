@@ -18,6 +18,7 @@ Use `references/admiralty-templates.md` when the user does not provide structure
 
 ## 2. Form The Squadron
 
+- Brief captains on mission intent and constraints. Make the plan clear, invite questions early.
 - Select one mode:
 - `single-session`: Use for sequential tasks, low complexity, or heavy same-file editing.
 - `subagents`: Use for parallel scouting or isolated tasks that report only to admiral.
@@ -47,6 +48,7 @@ Consult `references/standing-orders.md` when assigning files or if scope is uncl
 ## 4. Run Quarterdeck Rhythm
 
 - Keep admiral focused on coordination and unblock actions.
+- The admiral sets the mood of the squadron. Acknowledge progress, recognise strong work, and maintain cheerfulness under pressure.
 - Run checkpoints at fixed cadence (for example every 15-30 minutes):
 - Update progress by task state: `pending`, `in_progress`, `completed`.
 - Identify blockers and choose a concrete next action.
@@ -57,6 +59,7 @@ Consult `references/standing-orders.md` when assigning files or if scope is uncl
 
 Use `references/admiralty-templates.md` for the quarterdeck report template.
 Consult `references/standing-orders.md` if admiral is doing implementation or tasks are drifting from scope.
+Use `references/commendations.md` for recognition signals and graduated correction.
 
 ## 5. Set Action Stations
 
@@ -81,13 +84,16 @@ Consult `references/standing-orders.md` if tasks lack a tier or red-cell is assi
 - Diffs or artifacts.
 - Validation evidence.
 - Open risks and follow-ups.
+- Mentioned in Despatches: name agents and contributions that were exemplary.
 - Record reusable patterns and failure modes for future missions.
 
 Use `references/admiralty-templates.md` for the captain's log template.
+Use `references/commendations.md` for Mentioned in Despatches criteria.
 
 ## Admiralty Doctrine
 
 - Optimize for mission throughput, not equal work distribution.
 - Prefer replacing stalled agents over waiting on undefined blockers.
+- Recognise strong performance; motivation compounds across missions.
 - Keep coordination messages targeted and concise.
 - Escalate uncertainty early with options and one recommendation.
