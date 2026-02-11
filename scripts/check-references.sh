@@ -17,6 +17,7 @@ while IFS= read -r path; do
   if [ ! -f "$SKILL_DIR/$path" ]; then
     error "SKILL.md references '$path' but $SKILL_DIR/$path does not exist"
   fi
+# Case-insensitive: match "MUST" regardless of markdown emphasis
 done < <(grep -Ei 'MUST (read|consult|use|read and apply)' "$SKILL_DIR/SKILL.md" \
   | grep -oE '`references/[^`]+`' \
   | tr -d '`' \
@@ -50,9 +51,10 @@ for index in admiralty-templates standing-orders damage-control; do
 
   echo "Checking for orphans in $index/..."
   for file in "$subdir"/*.md; do
+    # Skip if glob matched no files (bash returns literal pattern)
     [ -f "$file" ] || continue
     basename=$(basename "$file")
-    if ! grep -q "$index/$basename" "$index_file"; then
+    if ! grep -qE "\`${index}/${basename}\`" "$index_file"; then
       error "$index/$basename exists on disk but is not listed in $index.md"
     fi
   done
@@ -61,9 +63,13 @@ done
 # ---------- 4. Reference file cross-refs ----------
 # Backtick-quoted paths in non-index reference files
 echo "Checking cross-references in reference files..."
-for ref_file in "$REF_DIR"/crew-roles.md "$REF_DIR"/commendations.md "$REF_DIR"/squadron-composition.md; do
+for ref_file in "$REF_DIR"/*.md; do
   [ -f "$ref_file" ] || continue
   basename=$(basename "$ref_file")
+  # Skip index files (they are validated in Section 2)
+  case "$basename" in
+    admiralty-templates.md|standing-orders.md|damage-control.md) continue ;;
+  esac
 
   # Paths like `references/foo.md` (relative to skill root)
   while IFS= read -r path; do
@@ -82,6 +88,51 @@ for ref_file in "$REF_DIR"/crew-roles.md "$REF_DIR"/commendations.md "$REF_DIR"/
   done < <(grep -oE '`(standing-orders|admiralty-templates|damage-control)/[^`]+\.md`' "$ref_file" \
     | tr -d '`' \
     | sort -u)
+done
+
+# ---------- 5. Subdirectory file cross-refs ----------
+# Backtick-quoted paths in subdirectory files
+echo "Checking cross-references in subdirectory files..."
+for subdir in admiralty-templates standing-orders damage-control; do
+  [ -d "$REF_DIR/$subdir" ] || continue
+  for ref_file in "$REF_DIR/$subdir"/*.md; do
+    [ -f "$ref_file" ] || continue
+    basename=$(basename "$ref_file")
+
+    # Paths like `references/foo.md` (relative to skill root)
+    while IFS= read -r path; do
+      if [ ! -f "$SKILL_DIR/$path" ]; then
+        error "$subdir/$basename references '$path' but $SKILL_DIR/$path does not exist"
+      fi
+    done < <(grep -oE '`references/[^`]+\.md`' "$ref_file" \
+      | tr -d '`' \
+      | sort -u)
+
+    # Paths like `standing-orders/foo.md` (relative to references/)
+    while IFS= read -r path; do
+      if [ ! -f "$REF_DIR/$path" ]; then
+        error "$subdir/$basename references '$path' but $REF_DIR/$path does not exist"
+      fi
+    done < <(grep -oE '`(standing-orders|admiralty-templates|damage-control)/[^`]+\.md`' "$ref_file" \
+      | tr -d '`' \
+      | sort -u)
+  done
+done
+
+# ---------- 6. Reverse orphan check ----------
+# Every top-level .md in references/ should be referenced by a MUST directive in SKILL.md
+echo "Checking for unreferenced top-level reference files..."
+for ref_file in "$REF_DIR"/*.md; do
+  [ -f "$ref_file" ] || continue
+  basename=$(basename "$ref_file")
+  # Skip index files (their sub-files are already checked in Section 2)
+  case "$basename" in
+    admiralty-templates.md|standing-orders.md|damage-control.md) continue ;;
+  esac
+
+  if ! grep -qE "\`references/${basename}\`" "$SKILL_DIR/SKILL.md"; then
+    error "$basename exists in references/ but is not referenced by any MUST directive in SKILL.md"
+  fi
 done
 
 # ---------- Summary ----------

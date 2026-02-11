@@ -5,28 +5,38 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   markdown:
     name: Markdown lint
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: DavidAnson/markdownlint-cli2-action@v19
+      - uses: DavidAnson/markdownlint-cli2-action@v22
         with:
           globs: "**/*.md"
 
   yaml:
     name: YAML lint
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: frenck/action-yamllint@v1
         with:
-          path: .claude/skills/nelson/agents/
+          path: .
 
   links:
     name: Link check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: lycheeverse/lychee-action@v2
@@ -36,13 +46,15 @@ jobs:
   spelling:
     name: Spell check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: crate-ci/typos@v1.31.1
+      - uses: crate-ci/typos@v1.43.4
 
   references:
     name: Cross-reference check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Validate skill cross-references
