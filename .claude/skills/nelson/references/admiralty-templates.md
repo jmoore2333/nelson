@@ -10,4 +10,5 @@ Consult the specific template for the current workflow step.
 | Run Quarterdeck Rhythm | `admiralty-templates/quarterdeck-report.md` |
 | Set Action Stations (red-cell review) | `admiralty-templates/red-cell-review.md` |
 | Brief crew for dispatch | `admiralty-templates/crew-briefing.md` |
+| Deploy marines from a ship | `admiralty-templates/marine-deployment-brief.md` |
 | Stand Down And Log Action | `admiralty-templates/captains-log.md` |

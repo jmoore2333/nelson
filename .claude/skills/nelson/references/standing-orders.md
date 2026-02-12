@@ -15,3 +15,4 @@ Consult the specific standing order that matches the situation.
 | Crewing every role regardless of task needs | `standing-orders/all-hands-on-deck.md` |
 | Spawning one crew member for an atomic task | `standing-orders/skeleton-crew.md` |
 | Assigning crew work outside their role | `standing-orders/pressed-crew.md` |
+| Captain deploying marines for crew work or sustained tasks | `standing-orders/battalion-ashore.md` |

@@ -74,3 +74,9 @@ The following standing orders apply specifically to crew operations:
 - `standing-orders/all-hands-on-deck.md` — Do not crew roles the task does not need (too many crew).
 - `standing-orders/skeleton-crew.md` — Do not spawn a single crew member for an atomic task (too few crew).
 - `standing-orders/pressed-crew.md` — Do not assign crew work outside their designated role (wrong crew).
+
+## Royal Marines
+
+Marines are NOT crew. They are short-lived sub-agents a captain deploys for discrete objectives outside the crew's task scope. See `references/royal-marines.md` for deployment rules and specialisations.
+
+Key distinction: Crew subdivide the ship's deliverable. Marines execute independent sorties in support of the ship's task.

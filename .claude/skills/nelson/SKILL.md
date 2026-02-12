@@ -29,6 +29,7 @@ You MUST read `references/admiralty-templates.md` and use the sailing-orders tem
 - Do not exceed 10 squadron-level agents (admiral, captains, red-cell navigator). Crew are additional.
 - Assign each captain a ship name from `references/crew-roles.md` matching task weight (frigate for general, destroyer for high-risk, patrol vessel for small, flagship for critical-path, submarine for research).
 - Captain decides crew composition per ship using the crew-or-direct decision tree in `references/crew-roles.md`.
+- Captains may also deploy Royal Marines during execution for short-lived sorties — see `references/royal-marines.md`.
 
 You MUST read `references/squadron-composition.md` for selection rules.
 You MUST read `references/crew-roles.md` for ship naming and crew composition.
@@ -40,7 +41,7 @@ You MUST consult `references/standing-orders.md` before forming the squadron.
 - Assign owner for each task and explicit dependencies.
 - Assign file ownership when implementation touches code.
 - Keep one task in progress per agent unless the mission explicitly requires multitasking.
-- For each captain's task, include a ship manifest. If crew are mustered, list crew roles with sub-tasks and sequence. If the captain implements directly (0 crew), note "Captain implements directly."
+- For each captain's task, include a ship manifest. If crew are mustered, list crew roles with sub-tasks and sequence. If the captain implements directly (0 crew), note "Captain implements directly." If the captain anticipates needing marine support, note marine capacity in the ship manifest (max 2).
 
 You MUST read `references/admiralty-templates.md` for the battle plan and ship manifest template.
 You MUST consult `references/standing-orders.md` when assigning files or if scope is unclear.
@@ -57,6 +58,7 @@ You MUST consult `references/standing-orders.md` when assigning files or if scop
 - Update progress by task state: `pending`, `in_progress`, `completed`.
 - Identify blockers and choose a concrete next action.
 - Confirm each crew member has active sub-tasks; flag idle crew or role mismatches.
+- Check for active marine deployments; verify marines have returned and outputs are incorporated.
 - Track burn against token/time budget.
 - Re-scope early when a task drifts from mission metric.
 - When a mission encounters difficulties, you MUST consult `references/damage-control.md` for recovery and escalation procedures.
@@ -77,6 +79,7 @@ You MUST use `references/commendations.md` for recognition signals and graduated
 - Agent idle with unverified outputs.
 - Before final synthesis.
 - For crewed tasks, verify crew outputs align with role boundaries (consult `references/crew-roles.md` and `references/standing-orders.md` if role violations are detected).
+- Marine deployments follow station-tier rules in `references/royal-marines.md`. Station 2+ marine deployments require admiral approval.
 
 You MUST consult `references/standing-orders.md` if tasks lack a tier or red-cell is assigned implementation work.
 
