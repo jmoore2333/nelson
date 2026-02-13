@@ -148,16 +148,33 @@
   };
 
   // =============================================================
+  // Fog of War Mode
+  // =============================================================
+  var FOG_OF_WAR = {
+    key: 'fogofwar',
+    name: 'Fog of War',
+    description: 'Enemy waters are shrouded in fog \u2014 firing reveals nearby cells. Navigate blind.',
+    icon: '\uD83C\uDF2B\uFE0F',
+
+    shotsPerTurn: function () { return 1; },
+    aiShotsPerTurn: function () { return 1; },
+
+    campaign: null,
+    scoreMultiplier: 1.75
+  };
+
+  // =============================================================
   // Registry helpers
   // =============================================================
   var registry = {
     classic:  CLASSIC,
     salvo:    SALVO,
-    campaign: CAMPAIGN
+    campaign: CAMPAIGN,
+    fogofwar: FOG_OF_WAR
   };
 
   function list() {
-    return ['classic', 'salvo', 'campaign'];
+    return ['classic', 'salvo', 'campaign', 'fogofwar'];
   }
 
   function get(modeKey) {
@@ -168,10 +185,11 @@
   // Public API
   // =============================================================
   window.Modes = {
-    list:     list,
-    get:      get,
-    CLASSIC:  CLASSIC,
-    SALVO:    SALVO,
-    CAMPAIGN: CAMPAIGN
+    list:       list,
+    get:        get,
+    CLASSIC:    CLASSIC,
+    SALVO:      SALVO,
+    CAMPAIGN:   CAMPAIGN,
+    FOG_OF_WAR: FOG_OF_WAR
   };
 })();

@@ -93,3 +93,11 @@ Run this checklist for Station 1+ tasks.
 - What is the fastest safe rollback?
 - What dependency could invalidate this plan?
 - What assumption is least certain?
+
+## Marine Deployments
+
+Marine deployments inherit the parent ship's station tier:
+
+- **Station 0-1:** Captain deploys at discretion. No admiral approval required.
+- **Station 2:** Captain must signal admiral and receive approval before deploying marines.
+- **Station 3:** Marine deployment is not permitted. All Trafalgar-tier work requires explicit Admiralty (human) confirmation.

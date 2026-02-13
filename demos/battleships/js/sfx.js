@@ -374,6 +374,512 @@ window.SFX = (function () {
     cleanup(nodes, dur);
   }
 
+  /* --- New sound: torpedo — fast whoosh/streak --- */
+  function torpedo() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 0.4, nodes = [];
+
+    /* High-frequency noise burst that sweeps from high to low */
+    var noise = ctx.createBufferSource();
+    noise.buffer = getNoiseBuffer();
+
+    var bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(6000, t);
+    bp.frequency.exponentialRampToValueAtTime(400, t + dur);
+    bp.Q.value = 2.0;
+
+    var ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.001, t);
+    ng.gain.linearRampToValueAtTime(0.4, t + 0.03);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    noise.connect(bp);
+    bp.connect(ng);
+    ng.connect(masterGain);
+    noise.start(t);
+    noise.stop(t + dur);
+    nodes.push(noise, bp, ng);
+
+    /* Thin sine whistle for the streak character */
+    var whistle = ctx.createOscillator();
+    whistle.type = 'sine';
+    whistle.frequency.setValueAtTime(4000, t);
+    whistle.frequency.exponentialRampToValueAtTime(800, t + dur);
+
+    var wg = ctx.createGain();
+    wg.gain.setValueAtTime(0.001, t);
+    wg.gain.linearRampToValueAtTime(0.12, t + 0.02);
+    wg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    whistle.connect(wg);
+    wg.connect(masterGain);
+    whistle.start(t);
+    whistle.stop(t + dur);
+    nodes.push(whistle, wg);
+
+    cleanup(nodes, dur);
+  }
+
+  /* --- New sound: airstrike — incoming whistle then heavy explosion --- */
+  function airstrike() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 1.4, nodes = [];
+
+    /* Phase 1: Descending whistle (0–0.6s) */
+    var whistle = ctx.createOscillator();
+    whistle.type = 'sine';
+    whistle.frequency.setValueAtTime(2000, t);
+    whistle.frequency.exponentialRampToValueAtTime(400, t + 0.6);
+
+    var wg = ctx.createGain();
+    wg.gain.setValueAtTime(0.001, t);
+    wg.gain.linearRampToValueAtTime(0.25, t + 0.05);
+    wg.gain.setValueAtTime(0.25, t + 0.5);
+    wg.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+
+    whistle.connect(wg);
+    wg.connect(masterGain);
+    whistle.start(t);
+    whistle.stop(t + 0.65);
+    nodes.push(whistle, wg);
+
+    /* Phase 2: Heavy explosion (0.6–1.4s) — noise burst */
+    var expNoise = ctx.createBufferSource();
+    expNoise.buffer = getNoiseBuffer();
+
+    var expBp = ctx.createBiquadFilter();
+    expBp.type = 'bandpass';
+    expBp.frequency.setValueAtTime(1000, t + 0.6);
+    expBp.frequency.exponentialRampToValueAtTime(150, t + dur);
+    expBp.Q.value = 0.8;
+
+    var expGain = ctx.createGain();
+    expGain.gain.setValueAtTime(0.001, t);
+    expGain.gain.setValueAtTime(0.001, t + 0.58);
+    expGain.gain.linearRampToValueAtTime(0.7, t + 0.62);
+    expGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    expNoise.connect(expBp);
+    expBp.connect(expGain);
+    expGain.connect(masterGain);
+    expNoise.start(t + 0.55);
+    expNoise.stop(t + dur);
+    nodes.push(expNoise, expBp, expGain);
+
+    /* Phase 2: Bass thud underneath explosion */
+    var bass = ctx.createOscillator();
+    bass.type = 'sine';
+    bass.frequency.setValueAtTime(100, t + 0.6);
+    bass.frequency.exponentialRampToValueAtTime(25, t + dur);
+
+    var bg = ctx.createGain();
+    bg.gain.setValueAtTime(0.001, t);
+    bg.gain.setValueAtTime(0.001, t + 0.58);
+    bg.gain.linearRampToValueAtTime(0.5, t + 0.63);
+    bg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    bass.connect(bg);
+    bg.connect(masterGain);
+    bass.start(t + 0.55);
+    bass.stop(t + dur);
+    nodes.push(bass, bg);
+
+    cleanup(nodes, dur);
+  }
+
+  /* --- New sound: sonarPing — high-pitched scanning ping with long reverb --- */
+  function sonarPing() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 1.5, nodes = [];
+
+    /* Primary ping — higher pitch than turnStart (~2000Hz) */
+    var ping = ctx.createOscillator();
+    ping.type = 'sine';
+    ping.frequency.setValueAtTime(2000, t);
+    ping.frequency.exponentialRampToValueAtTime(2100, t + 0.03);
+    ping.frequency.exponentialRampToValueAtTime(2000, t + dur);
+
+    /* Narrow bandpass for tight sonar character */
+    var bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2000;
+    bp.Q.value = 14;
+
+    var pg = ctx.createGain();
+    pg.gain.setValueAtTime(0.001, t);
+    pg.gain.linearRampToValueAtTime(0.2, t + 0.01);
+    pg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    ping.connect(bp);
+    bp.connect(pg);
+    pg.connect(masterGain);
+    ping.start(t);
+    ping.stop(t + dur);
+    nodes.push(ping, bp, pg);
+
+    /* Echo 1 — delayed attenuated repeat */
+    var echo1 = ctx.createOscillator();
+    echo1.type = 'sine';
+    echo1.frequency.value = 2000;
+
+    var e1bp = ctx.createBiquadFilter();
+    e1bp.type = 'bandpass';
+    e1bp.frequency.value = 2000;
+    e1bp.Q.value = 16;
+
+    var e1g = ctx.createGain();
+    e1g.gain.setValueAtTime(0.001, t);
+    e1g.gain.setValueAtTime(0.001, t + 0.18);
+    e1g.gain.linearRampToValueAtTime(0.08, t + 0.2);
+    e1g.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+
+    echo1.connect(e1bp);
+    e1bp.connect(e1g);
+    e1g.connect(masterGain);
+    echo1.start(t);
+    echo1.stop(t + 1.0);
+    nodes.push(echo1, e1bp, e1g);
+
+    /* Echo 2 — even quieter, further delayed */
+    var echo2 = ctx.createOscillator();
+    echo2.type = 'sine';
+    echo2.frequency.value = 2000;
+
+    var e2bp = ctx.createBiquadFilter();
+    e2bp.type = 'bandpass';
+    e2bp.frequency.value = 2000;
+    e2bp.Q.value = 18;
+
+    var e2g = ctx.createGain();
+    e2g.gain.setValueAtTime(0.001, t);
+    e2g.gain.setValueAtTime(0.001, t + 0.4);
+    e2g.gain.linearRampToValueAtTime(0.03, t + 0.42);
+    e2g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    echo2.connect(e2bp);
+    e2bp.connect(e2g);
+    e2g.connect(masterGain);
+    echo2.start(t);
+    echo2.stop(t + dur);
+    nodes.push(echo2, e2bp, e2g);
+
+    cleanup(nodes, dur);
+  }
+
+  /* --- New sound: fogReveal — gentle atmospheric whoosh --- */
+  function fogReveal() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 0.5, nodes = [];
+
+    /* Filtered noise that swells then fades — like a curtain drawn */
+    var noise = ctx.createBufferSource();
+    noise.buffer = getNoiseBuffer();
+
+    var lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(800, t);
+    lp.frequency.linearRampToValueAtTime(3000, t + 0.15);
+    lp.frequency.exponentialRampToValueAtTime(600, t + dur);
+    lp.Q.value = 0.5;
+
+    var hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 300;
+
+    var ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.001, t);
+    ng.gain.linearRampToValueAtTime(0.15, t + 0.12);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    noise.connect(hp);
+    hp.connect(lp);
+    lp.connect(ng);
+    ng.connect(masterGain);
+    noise.start(t);
+    noise.stop(t + dur);
+    nodes.push(noise, lp, hp, ng);
+
+    /* Subtle sine shimmer for an airy quality */
+    var shimmer = ctx.createOscillator();
+    shimmer.type = 'sine';
+    shimmer.frequency.value = 1200;
+
+    var sg = ctx.createGain();
+    sg.gain.setValueAtTime(0.001, t);
+    sg.gain.linearRampToValueAtTime(0.04, t + 0.1);
+    sg.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+
+    shimmer.connect(sg);
+    sg.connect(masterGain);
+    shimmer.start(t);
+    shimmer.stop(t + 0.4);
+    nodes.push(shimmer, sg);
+
+    cleanup(nodes, dur);
+  }
+
+  /* --- New sound: weaponSelect — mechanical click with metallic resonance --- */
+  function weaponSelect() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 0.15, nodes = [];
+
+    /* Quick square wave click */
+    var click = ctx.createOscillator();
+    click.type = 'square';
+    click.frequency.setValueAtTime(800, t);
+    click.frequency.exponentialRampToValueAtTime(200, t + 0.02);
+
+    var cg = ctx.createGain();
+    cg.gain.setValueAtTime(0.2, t);
+    cg.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+
+    click.connect(cg);
+    cg.connect(masterGain);
+    click.start(t);
+    click.stop(t + 0.04);
+    nodes.push(click, cg);
+
+    /* Metallic resonance — high-Q bandpassed sine ring */
+    var metal = ctx.createOscillator();
+    metal.type = 'sine';
+    metal.frequency.value = 3500;
+
+    var mbp = ctx.createBiquadFilter();
+    mbp.type = 'bandpass';
+    mbp.frequency.value = 3500;
+    mbp.Q.value = 20;
+
+    var mg = ctx.createGain();
+    mg.gain.setValueAtTime(0.001, t);
+    mg.gain.linearRampToValueAtTime(0.1, t + 0.005);
+    mg.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    metal.connect(mbp);
+    mbp.connect(mg);
+    mg.connect(masterGain);
+    metal.start(t);
+    metal.stop(t + dur);
+    nodes.push(metal, mbp, mg);
+
+    cleanup(nodes, dur);
+  }
+
+  /* --- New sound: radarSweep — quiet continuous sweeping tone --- */
+  function radarSweep() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 2.0, nodes = [];
+
+    /* Low-frequency oscillator modulated by LFO */
+    var osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 220;
+
+    /* LFO to create sweeping effect */
+    var lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.5; /* one full sweep per 2 seconds */
+
+    var lfoGain = ctx.createGain();
+    lfoGain.gain.value = 80; /* modulation depth */
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+
+    /* Soft low-pass to keep it muted/ambient */
+    var lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 500;
+    lp.Q.value = 1.0;
+
+    var og = ctx.createGain();
+    og.gain.setValueAtTime(0.001, t);
+    og.gain.linearRampToValueAtTime(0.08, t + 0.15);
+    og.gain.setValueAtTime(0.08, t + dur - 0.2);
+    og.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    osc.connect(lp);
+    lp.connect(og);
+    og.connect(masterGain);
+    osc.start(t);
+    osc.stop(t + dur);
+    lfo.start(t);
+    lfo.stop(t + dur);
+    nodes.push(osc, lp, og, lfo, lfoGain);
+
+    /* Secondary subtle noise layer for texture */
+    var noise = ctx.createBufferSource();
+    noise.buffer = getNoiseBuffer();
+
+    var nbp = ctx.createBiquadFilter();
+    nbp.type = 'bandpass';
+    nbp.frequency.value = 300;
+    nbp.Q.value = 3;
+
+    var nGain = ctx.createGain();
+    nGain.gain.setValueAtTime(0.001, t);
+    nGain.gain.linearRampToValueAtTime(0.02, t + 0.15);
+    nGain.gain.setValueAtTime(0.02, t + dur - 0.2);
+    nGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    noise.connect(nbp);
+    nbp.connect(nGain);
+    nGain.connect(masterGain);
+    noise.start(t);
+    noise.stop(t + dur);
+    nodes.push(noise, nbp, nGain);
+
+    cleanup(nodes, dur);
+  }
+
+  /* --- New sound: shipSinking — extended sinking with rumble, creaking, bubbling --- */
+  function shipSinking() {
+    if (!ensureContext()) return;
+    var t = now(), dur = 3.0, nodes = [];
+
+    /* (a) Deep rumble — low noise through low-pass */
+    var rumbleNoise = ctx.createBufferSource();
+    rumbleNoise.buffer = getNoiseBuffer();
+
+    var rumbleLp = ctx.createBiquadFilter();
+    rumbleLp.type = 'lowpass';
+    rumbleLp.frequency.setValueAtTime(200, t);
+    rumbleLp.frequency.exponentialRampToValueAtTime(60, t + dur);
+    rumbleLp.Q.value = 0.7;
+
+    var rumbleGain = ctx.createGain();
+    rumbleGain.gain.setValueAtTime(0.001, t);
+    rumbleGain.gain.linearRampToValueAtTime(0.4, t + 0.2);
+    rumbleGain.gain.setValueAtTime(0.35, t + 1.5);
+    rumbleGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    rumbleNoise.connect(rumbleLp);
+    rumbleLp.connect(rumbleGain);
+    rumbleGain.connect(masterGain);
+    rumbleNoise.start(t);
+    rumbleNoise.stop(t + dur);
+    nodes.push(rumbleNoise, rumbleLp, rumbleGain);
+
+    /* Deep bass sine for weight */
+    var bassDrone = ctx.createOscillator();
+    bassDrone.type = 'sine';
+    bassDrone.frequency.setValueAtTime(80, t);
+    bassDrone.frequency.exponentialRampToValueAtTime(20, t + dur);
+
+    var bassGain = ctx.createGain();
+    bassGain.gain.setValueAtTime(0.001, t);
+    bassGain.gain.linearRampToValueAtTime(0.35, t + 0.3);
+    bassGain.gain.setValueAtTime(0.3, t + 1.5);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    bassDrone.connect(bassGain);
+    bassGain.connect(masterGain);
+    bassDrone.start(t);
+    bassDrone.stop(t + dur);
+    nodes.push(bassDrone, bassGain);
+
+    /* (b) Creaking — modulated sawtooth through bandpass */
+    var creak = ctx.createOscillator();
+    creak.type = 'sawtooth';
+    creak.frequency.setValueAtTime(350, t + 0.3);
+    creak.frequency.linearRampToValueAtTime(120, t + 2.5);
+
+    var creakMod = ctx.createOscillator();
+    creakMod.type = 'sine';
+    creakMod.frequency.value = 4;
+
+    var creakModGain = ctx.createGain();
+    creakModGain.gain.value = 60;
+
+    creakMod.connect(creakModGain);
+    creakModGain.connect(creak.frequency);
+
+    var creakBp = ctx.createBiquadFilter();
+    creakBp.type = 'bandpass';
+    creakBp.frequency.value = 600;
+    creakBp.Q.value = 5;
+
+    var creakGain = ctx.createGain();
+    creakGain.gain.setValueAtTime(0.001, t);
+    creakGain.gain.setValueAtTime(0.001, t + 0.3);
+    creakGain.gain.linearRampToValueAtTime(0.18, t + 0.6);
+    creakGain.gain.setValueAtTime(0.15, t + 1.5);
+    creakGain.gain.linearRampToValueAtTime(0.1, t + 2.2);
+    creakGain.gain.exponentialRampToValueAtTime(0.001, t + 2.8);
+
+    creak.connect(creakBp);
+    creakBp.connect(creakGain);
+    creakGain.connect(masterGain);
+    creak.start(t + 0.3);
+    creak.stop(t + 2.8);
+    creakMod.start(t + 0.3);
+    creakMod.stop(t + 2.8);
+    nodes.push(creak, creakMod, creakModGain, creakBp, creakGain);
+
+    /* (c) Heavy bubbling — frequency-modulated sine */
+    var bubble = ctx.createOscillator();
+    bubble.type = 'sine';
+    bubble.frequency.setValueAtTime(500, t + 0.8);
+    bubble.frequency.exponentialRampToValueAtTime(150, t + dur);
+
+    var bubbleMod = ctx.createOscillator();
+    bubbleMod.type = 'sine';
+    bubbleMod.frequency.value = 18;
+
+    var bubbleModGain = ctx.createGain();
+    bubbleModGain.gain.value = 120;
+
+    bubbleMod.connect(bubbleModGain);
+    bubbleModGain.connect(bubble.frequency);
+
+    var bubbleGain = ctx.createGain();
+    bubbleGain.gain.setValueAtTime(0.001, t);
+    bubbleGain.gain.setValueAtTime(0.001, t + 0.8);
+    bubbleGain.gain.linearRampToValueAtTime(0.15, t + 1.2);
+    bubbleGain.gain.setValueAtTime(0.15, t + 2.0);
+    bubbleGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    bubble.connect(bubbleGain);
+    bubbleGain.connect(masterGain);
+    bubble.start(t + 0.8);
+    bubble.stop(t + dur);
+    bubbleMod.start(t + 0.8);
+    bubbleMod.stop(t + dur);
+    nodes.push(bubble, bubbleMod, bubbleModGain, bubbleGain);
+
+    /* Additional high bubble cluster for detail */
+    var hiBub = ctx.createOscillator();
+    hiBub.type = 'sine';
+    hiBub.frequency.setValueAtTime(800, t + 1.0);
+    hiBub.frequency.exponentialRampToValueAtTime(300, t + dur);
+
+    var hiBubMod = ctx.createOscillator();
+    hiBubMod.type = 'sine';
+    hiBubMod.frequency.value = 25;
+
+    var hiBubModGain = ctx.createGain();
+    hiBubModGain.gain.value = 80;
+
+    hiBubMod.connect(hiBubModGain);
+    hiBubModGain.connect(hiBub.frequency);
+
+    var hiBubGain = ctx.createGain();
+    hiBubGain.gain.setValueAtTime(0.001, t);
+    hiBubGain.gain.setValueAtTime(0.001, t + 1.0);
+    hiBubGain.gain.linearRampToValueAtTime(0.08, t + 1.3);
+    hiBubGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    hiBub.connect(hiBubGain);
+    hiBubGain.connect(masterGain);
+    hiBub.start(t + 1.0);
+    hiBub.stop(t + dur);
+    hiBubMod.start(t + 1.0);
+    hiBubMod.stop(t + dur);
+    nodes.push(hiBub, hiBubMod, hiBubModGain, hiBubGain);
+
+    cleanup(nodes, dur);
+  }
+
   return {
     init: init,
     hit: hit,
@@ -388,6 +894,13 @@ window.SFX = (function () {
     startAmbient: startAmbient,
     stopAmbient: stopAmbient,
     turnStart: turnStart,
-    achievement: achievement
+    achievement: achievement,
+    torpedo: torpedo,
+    airstrike: airstrike,
+    sonarPing: sonarPing,
+    fogReveal: fogReveal,
+    weaponSelect: weaponSelect,
+    radarSweep: radarSweep,
+    shipSinking: shipSinking
   };
 })();

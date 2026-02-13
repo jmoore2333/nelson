@@ -337,5 +337,275 @@ window.Particles = (function () {
     ensureAnimating();
   }
 
-  return { splash: splash, fire: fire, explode: explode, debris: debris, wake: wake, smoke: smoke };
+  /* --- New effect: torpedoTrail — animated streak from source to target --- */
+
+  function torpedoTrail(x1, y1, x2, y2) {
+    var colors = ['#4fc3f7', '#e1f5fe', '#ffffff'];
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var steps = Math.max(12, Math.floor(dist / 8));
+    var duration = 500; /* ms total travel time */
+
+    for (var i = 0; i < steps; i++) {
+      (function (index) {
+        setTimeout(function () {
+          var t = index / (steps - 1);
+          var px = x1 + dx * t;
+          var py = y1 + dy * t;
+          for (var j = 0; j < 3; j++) {
+            var p = acquire(); if (!p) return;
+            var spread = rand(-6, 6);
+            var perpX = -dy / dist * spread;
+            var perpY = dx / dist * spread;
+            p.x = px + perpX + rand(-2, 2);
+            p.y = py + perpY + rand(-2, 2);
+            p.vx = rand(-15, 15);
+            p.vy = rand(-15, 15);
+            p.gravity = 0;
+            p.life = rand(0.2, 0.5);
+            p.maxLife = p.life;
+            p.size = rand(1.5, 4);
+            p.sizeEnd = 0.5;
+            p.color = colors[Math.floor(Math.random() * colors.length)];
+            p.type = 'circle';
+            p.rotation = 0;
+            p.rotationSpeed = 0;
+            p.drag = 1.0;
+          }
+          ensureAnimating();
+        }, (index / steps) * duration);
+      })(i);
+    }
+  }
+
+  /* --- New effect: radarSweep — rotating green line sweep --- */
+
+  function radarSweep(centerX, centerY, radius) {
+    var sweepDuration = 2000; /* ms */
+    var totalSteps = 60;
+    var angleStep = (Math.PI * 2) / totalSteps;
+
+    for (var s = 0; s < totalSteps; s++) {
+      (function (step) {
+        setTimeout(function () {
+          var angle = step * angleStep;
+          var lineParticles = 8;
+          for (var i = 0; i < lineParticles; i++) {
+            var p = acquire(); if (!p) return;
+            var r = (i / lineParticles) * radius;
+            p.x = centerX + Math.cos(angle) * r;
+            p.y = centerY + Math.sin(angle) * r;
+            p.vx = Math.cos(angle) * rand(2, 8);
+            p.vy = Math.sin(angle) * rand(2, 8);
+            p.gravity = 0;
+            p.life = rand(0.3, 0.6);
+            p.maxLife = p.life;
+            p.size = rand(1.5, 3);
+            p.sizeEnd = 0.5;
+            p.color = 'rgba(46,204,113,0.6)';
+            p.type = 'circle';
+            p.rotation = 0;
+            p.rotationSpeed = 0;
+            p.drag = 0.5;
+          }
+          ensureAnimating();
+        }, (step / totalSteps) * sweepDuration);
+      })(s);
+    }
+  }
+
+  /* --- New effect: sonarPing — expanding concentric rings --- */
+
+  function sonarPing(x, y) {
+    var ringDelays = [0, 300, 600, 900];
+    var colors = ['#2ecc71', '#27ae60', '#2ecc71', '#27ae60'];
+
+    for (var i = 0; i < ringDelays.length; i++) {
+      (function (index) {
+        setTimeout(function () {
+          var ring = acquire(); if (!ring) return;
+          ring.x = x;
+          ring.y = y;
+          ring.vx = 0;
+          ring.vy = 0;
+          ring.gravity = 0;
+          ring.life = 0.8;
+          ring.maxLife = 0.8;
+          ring.size = 0;
+          ring.sizeEnd = 0;
+          ring.color = colors[index];
+          ring.type = 'ring';
+          ring.ringRadius = 4;
+          ring.ringMaxRadius = 50 + index * 15;
+          ring.rotation = 0;
+          ring.rotationSpeed = 0;
+          ring.drag = 0;
+          ensureAnimating();
+        }, ringDelays[index]);
+      })(i);
+    }
+
+    /* Central pulse particles */
+    for (var j = 0; j < 6; j++) {
+      var p = acquire(); if (!p) break;
+      var angle = (j / 6) * Math.PI * 2;
+      p.x = x;
+      p.y = y;
+      p.vx = Math.cos(angle) * rand(10, 25);
+      p.vy = Math.sin(angle) * rand(10, 25);
+      p.gravity = 0;
+      p.life = rand(0.4, 0.8);
+      p.maxLife = p.life;
+      p.size = rand(2, 4);
+      p.sizeEnd = 0.5;
+      p.color = '#2ecc71';
+      p.type = 'circle';
+      p.rotation = 0;
+      p.rotationSpeed = 0;
+      p.drag = 1.5;
+    }
+    ensureAnimating();
+  }
+
+  /* --- New effect: airstrike — falling particles then explosion --- */
+
+  function airstrike(x, y) {
+    var streakColors = ['#ff6d00', '#ffab00', '#ffffff', '#ff3d00'];
+    var startY = -40; /* above viewport */
+    var fallDuration = 600; /* ms before impact */
+    var streakCount = 8;
+
+    for (var i = 0; i < streakCount; i++) {
+      (function (index) {
+        setTimeout(function () {
+          var p = acquire(); if (!p) return;
+          p.x = x + rand(-15, 15);
+          p.y = startY + rand(-20, 0);
+          var totalDist = y - p.y;
+          p.vx = rand(-10, 10);
+          p.vy = totalDist / (fallDuration / 1000 * 0.6);
+          p.gravity = 400;
+          p.life = rand(0.5, 0.8);
+          p.maxLife = p.life;
+          p.size = rand(2, 4);
+          p.sizeEnd = 1;
+          p.color = streakColors[Math.floor(Math.random() * streakColors.length)];
+          p.type = 'circle';
+          p.rotation = 0;
+          p.rotationSpeed = 0;
+          p.drag = 0;
+
+          /* Trailing sparks behind each streak */
+          for (var t = 0; t < 3; t++) {
+            var tp = acquire(); if (!tp) break;
+            tp.x = p.x + rand(-3, 3);
+            tp.y = p.y + rand(0, 20);
+            tp.vx = rand(-5, 5);
+            tp.vy = p.vy * 0.3;
+            tp.gravity = 100;
+            tp.life = rand(0.2, 0.4);
+            tp.maxLife = tp.life;
+            tp.size = rand(1, 2);
+            tp.sizeEnd = 0.5;
+            tp.color = '#ffab00';
+            tp.type = 'circle';
+            tp.rotation = 0;
+            tp.rotationSpeed = 0;
+            tp.drag = 0.5;
+          }
+          ensureAnimating();
+        }, index * 40);
+      })(i);
+    }
+
+    /* Explosion at impact point after fall */
+    setTimeout(function () {
+      explode(x, y);
+    }, fallDuration);
+  }
+
+  /* --- New effect: sinking — bubbles rising, debris sinking --- */
+
+  function sinking(x, y) {
+    var metalColors = ['#90a4ae', '#b0bec5', '#78909c', '#607d8b'];
+    var bubbleColors = ['#b3e5fc', '#e1f5fe', '#81d4fa'];
+
+    /* Metallic debris sinking downward */
+    for (var i = 0; i < 12; i++) {
+      var d = acquire(); if (!d) break;
+      d.x = x + rand(-12, 12);
+      d.y = y + rand(-6, 6);
+      d.vx = rand(-15, 15);
+      d.vy = rand(20, 80);
+      d.gravity = 60;
+      d.life = rand(1.2, 2.0);
+      d.maxLife = d.life;
+      d.size = rand(2, 6);
+      d.sizeEnd = rand(1, 2);
+      d.color = metalColors[Math.floor(Math.random() * metalColors.length)];
+      d.type = 'debris';
+      d.rotation = rand(0, Math.PI * 2);
+      d.rotationSpeed = rand(-6, 6);
+      d.drag = 0.8;
+    }
+
+    /* Bubbles rising from the sinking point */
+    for (var b = 0; b < 20; b++) {
+      (function (index) {
+        setTimeout(function () {
+          var p = acquire(); if (!p) return;
+          p.x = x + rand(-10, 10);
+          p.y = y + rand(-4, 8);
+          p.vx = rand(-8, 8);
+          p.vy = rand(-80, -30);
+          p.gravity = -20;
+          p.life = rand(0.6, 1.5);
+          p.maxLife = p.life;
+          p.size = rand(1.5, 5);
+          p.sizeEnd = rand(0.5, 2);
+          p.color = bubbleColors[Math.floor(Math.random() * bubbleColors.length)];
+          p.type = 'circle';
+          p.rotation = 0;
+          p.rotationSpeed = 0;
+          p.drag = 1.2;
+          ensureAnimating();
+        }, index * 80);
+      })(b);
+    }
+
+    /* Slow expanding rings at surface */
+    for (var r = 0; r < 3; r++) {
+      (function (index) {
+        setTimeout(function () {
+          var ring = acquire(); if (!ring) return;
+          ring.x = x + rand(-4, 4);
+          ring.y = y;
+          ring.vx = 0;
+          ring.vy = 0;
+          ring.gravity = 0;
+          ring.life = 1.0;
+          ring.maxLife = 1.0;
+          ring.size = 0;
+          ring.sizeEnd = 0;
+          ring.color = '#81d4fa';
+          ring.type = 'ring';
+          ring.ringRadius = 3;
+          ring.ringMaxRadius = 35 + index * 10;
+          ring.rotation = 0;
+          ring.rotationSpeed = 0;
+          ring.drag = 0;
+          ensureAnimating();
+        }, index * 400);
+      })(r);
+    }
+
+    ensureAnimating();
+  }
+
+  return {
+    splash: splash, fire: fire, explode: explode, debris: debris, wake: wake, smoke: smoke,
+    torpedoTrail: torpedoTrail, radarSweep: radarSweep, sonarPing: sonarPing,
+    airstrike: airstrike, sinking: sinking
+  };
 })();
