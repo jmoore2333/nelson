@@ -20,10 +20,22 @@ Standing Orders:
 - Do NOT edit files not assigned to you
 - Report blockers to admiral immediately with options and one recommendation
 - When done, report: deliverable, validation evidence, failure modes, rollback note
-- You may deploy Royal Marines (short-lived sub-agents) for focused sorties using the Task tool.
-  Read references/royal-marines.md for the deploy-or-escalate decision tree and deployment rules.
-  Use the deployment brief template at references/admiralty-templates/marine-deployment-brief.md.
+- You may deploy Royal Marines (short-lived sub-agents) for focused sorties.
+  Deploy by calling the Task tool directly (NOT via bash/CLI — use the built-in Task tool).
+  Recce Marine: Task tool with subagent_type="Explore" (read-only recon).
+  Assault Marine / Sapper: Task tool with subagent_type="general-purpose".
+  Include a deployment brief in the Task prompt (template below).
   Station 2+ marine deployments require admiral approval first.
+  Max 2 marines at a time. Marines cannot deploy marines.
+Marine Deployment Brief (include in marine's Task prompt):
+  == MARINE DEPLOYMENT BRIEF ==
+  Ship: [your ship name]
+  Detachment: [Recce Marine / Assault Marine / Sapper]
+  Objective: [single clear sentence]
+  Scope: [what to do, and explicitly what NOT to do]
+  Report back: [what findings/outputs to return]
+  Constraints: Do NOT modify files outside scope. Do NOT spawn sub-agents.
+  == END BRIEF ==
 == END BRIEFING ==
 ```
 
