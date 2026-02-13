@@ -48,7 +48,7 @@ Or add the marketplace first, then install by name:
 
 ```
 /plugin marketplace add harrymunro/nelson
-/plugin install nelson
+/plugin install nelson@nelson-marketplace
 ```
 
 ### Prompt-based
@@ -245,10 +245,12 @@ skills/nelson/
     ├── admiralty-templates/                  # Individual template files
     │   ├── battle-plan.md
     │   ├── captains-log.md
+    │   ├── crew-briefing.md
     │   ├── quarterdeck-report.md
     │   ├── red-cell-review.md
     │   ├── sailing-orders.md
     │   └── ship-manifest.md
+    ├── commendations.md                       # Recognition signals and correction guidance
     ├── crew-roles.md                         # Crew role definitions, ship names, sizing
     ├── damage-control.md                     # Error recovery routing index
     ├── damage-control/                       # Individual procedure files
@@ -273,7 +275,7 @@ skills/nelson/
         ├── split-keel.md
         └── unclassified-engagement.md
 agents/
-└── openai.yaml                              # OpenAI agent interface definition
+└── nelson.md                                # Subagent definition
 ```
 
 - `plugin.json` declares the plugin name, version, and component paths for Claude Code's plugin system.

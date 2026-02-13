@@ -1,9 +1,10 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "nelson-marketplace",
-  "description": "Royal Navy agent coordination framework for Claude Code",
   "owner": {
     "name": "Harry Munro"
+  },
+  "metadata": {
+    "description": "Royal Navy agent coordination framework for Claude Code"
   },
   "plugins": [
     {

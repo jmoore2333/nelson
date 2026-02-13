@@ -5,7 +5,5 @@
   "author": { "name": "Harry Munro" },
   "repository": "https://github.com/harrymunro/nelson",
   "license": "MIT",
-  "keywords": ["agents", "coordination", "teams", "workflow"],
-  "skills": "./skills/",
-  "agents": "./agents/"
+  "keywords": ["agents", "coordination", "teams", "workflow"]
 }
