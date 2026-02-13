@@ -1,3 +1,5 @@
+# Graduated Discipline
+
 Yes — corrections are logged, but per-mission, not in a persistent cross-mission store.
 
 The escalation ladder has three levels:
