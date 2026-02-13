@@ -21,6 +21,10 @@
   var enemyFleetList  = document.getElementById('enemy-fleet-list');
   var logEntries     = document.getElementById('log-entries');
 
+  // Weapons/Fog DOM references
+  var weaponsPanelEl   = document.getElementById('weapons-panel');
+  var directionPickerEl = document.getElementById('direction-picker');
+
   // New DOM references
   var modeSelectScreen = document.getElementById('mode-select-screen');
   var startGameBtn   = document.getElementById('start-game-btn');
@@ -63,6 +67,11 @@
   // Salvo state
   var salvoShotsRemaining = 0;
   var salvoTurnActive = false;
+
+  // Weapons & Fog of War state
+  var weaponsState = null;
+  var fogState = null;
+  var pendingWeaponClick = null; // {row, col} for torpedo awaiting direction
 
   var shipDefs = [
     { key: 'carrier',    name: 'Carrier',    size: 5 },
@@ -380,6 +389,7 @@
     phase = 'placement';
     placementPanel.classList.remove('hidden');
     resetPlacement();
+    initDragPlacement();
     setStatus('Place your ' + shipDefs[0].name + ' (' + shipDefs[0].size + ' cells)');
 
     // Show campaign round info if applicable
@@ -679,11 +689,296 @@
     startBattle();
   });
 
+  // ----- Drag-and-drop placement -----
+  function initDragPlacement() {
+    DragPlacement.init(playerGrid, placementPanel, {
+      onPlace: function (shipKey, shipName, size, row, col, horiz) {
+        var result = Engine.placeShip(playerBoard, playerShips, shipName, size, row, col, horiz);
+        if (result === null) return;
+        SFX.place();
+        applyShipClasses(playerGrid, playerShips[playerShips.length - 1]);
+        placedShips[shipKey] = true;
+        DragPlacement.markPlaced(shipKey);
+        // Mark ship option in panel
+        for (var d = 0; d < shipDefs.length; d++) {
+          if (shipDefs[d].key === shipKey) { markShipPlaced(d); break; }
+        }
+        // Find next unplaced ship
+        var foundNext = false;
+        for (var n = 0; n < shipDefs.length; n++) {
+          if (!placedShips[shipDefs[n].key]) {
+            currentShipIndex = n;
+            selectShipOption(n);
+            setStatus('Place your ' + shipDefs[n].name + ' (' + shipDefs[n].size + ' cells)');
+            foundNext = true;
+            break;
+          }
+        }
+        if (!foundNext) startBattle();
+      },
+      canPlace: function (size, row, col, horiz) {
+        return Engine.canPlaceShip(playerBoard, size, row, col, horiz);
+      },
+      onRotate: function () {
+        horizontal = !horizontal;
+        rotateBtn.textContent = horizontal ? 'Rotate (R)' : 'Rotate (R) \u2014 Vertical';
+      },
+      getHorizontal: function () { return horizontal; }
+    });
+  }
+
+  // ----- Weapons panel helpers -----
+  function updateWeaponsPanel() {
+    if (!weaponsState) return;
+    var btns = weaponsPanelEl.querySelectorAll('.weapon-btn');
+    for (var i = 0; i < btns.length; i++) {
+      var btn = btns[i];
+      var type = btn.getAttribute('data-weapon');
+      var usesEl = btn.querySelector('.weapon-uses');
+      if (weaponsState[type]) {
+        usesEl.textContent = weaponsState[type].uses;
+        if (weaponsState[type].uses <= 0) {
+          btn.classList.add('exhausted');
+          btn.classList.remove('active');
+        } else {
+          btn.classList.remove('exhausted');
+        }
+      }
+      // Highlight active weapon
+      if (weaponsState.active === type) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+  }
+
+  function hideWeaponsPanel() {
+    weaponsPanelEl.style.display = 'none';
+    directionPickerEl.style.display = 'none';
+    pendingWeaponClick = null;
+  }
+
+  // ----- Weapon button click handlers -----
+  (function () {
+    var btns = weaponsPanelEl.querySelectorAll('.weapon-btn');
+    for (var i = 0; i < btns.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          if (phase !== 'battle' || locked || !weaponsState) return;
+          var type = btn.getAttribute('data-weapon');
+          if (weaponsState[type].uses <= 0) return;
+
+          // Toggle weapon off if already active
+          if (weaponsState.active === type) {
+            Weapons.deactivate(weaponsState);
+            directionPickerEl.style.display = 'none';
+            pendingWeaponClick = null;
+            updateWeaponsPanel();
+            setStatus("Turn " + turnNumber + " \u2014 Fire at enemy waters!");
+            return;
+          }
+
+          var info = Weapons.activate(weaponsState, type);
+          if (!info) return;
+          SFX.weaponSelect();
+          updateWeaponsPanel();
+          setStatus("Turn " + turnNumber + " \u2014 " + info.type.charAt(0).toUpperCase() + info.type.slice(1) + " active! Click enemy waters.");
+        });
+      })(btns[i]);
+    }
+  })();
+
+  // ----- Direction picker handlers -----
+  (function () {
+    var dirBtns = directionPickerEl.querySelectorAll('.direction-btn');
+    for (var i = 0; i < dirBtns.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          var dir = btn.getAttribute('data-direction');
+          if (dir === 'cancel') {
+            directionPickerEl.style.display = 'none';
+            if (weaponsState) Weapons.deactivate(weaponsState);
+            pendingWeaponClick = null;
+            updateWeaponsPanel();
+            setStatus("Turn " + turnNumber + " \u2014 Fire at enemy waters!");
+            locked = false;
+            return;
+          }
+          if (!pendingWeaponClick || !weaponsState) return;
+          directionPickerEl.style.display = 'none';
+          executeWeapon(pendingWeaponClick.row, pendingWeaponClick.col, dir);
+          pendingWeaponClick = null;
+        });
+      })(dirBtns[i]);
+    }
+  })();
+
+  // ----- Execute weapon after direction (if needed) -----
+  function executeWeapon(row, col, direction) {
+    var result = Weapons.execute(weaponsState, enemyBoard, enemyShips, row, col, direction);
+    if (!result) { locked = false; return; }
+
+    updateWeaponsPanel();
+
+    if (result.type === 'torpedo') {
+      SFX.torpedo();
+      // Animate torpedo trail
+      var startCell = getCell(enemyGrid, row, col);
+      if (startCell) {
+        var sRect = startCell.getBoundingClientRect();
+        var cx = sRect.left + sRect.width / 2;
+        var cy = sRect.top + sRect.height / 2;
+        // Find end cell
+        var lastCell = result.cells[result.cells.length - 1];
+        var endEl = getCell(enemyGrid, lastCell.row, lastCell.col);
+        if (endEl) {
+          var eRect = endEl.getBoundingClientRect();
+          Particles.torpedoTrail(cx, cy, eRect.left + eRect.width / 2, eRect.top + eRect.height / 2);
+        }
+      }
+      processWeaponCells(result.cells, true);
+    } else if (result.type === 'airstrike') {
+      SFX.airstrike();
+      // Airstrike particle at center
+      var centerEl = getCell(enemyGrid, row, col);
+      if (centerEl) {
+        var cRect = centerEl.getBoundingClientRect();
+        Particles.airstrike(cRect.left + cRect.width / 2, cRect.top + cRect.height / 2);
+      }
+      processWeaponCells(result.cells, true);
+    } else if (result.type === 'sonar') {
+      SFX.sonarPing();
+      // Sonar particle at center
+      var sonarEl = getCell(enemyGrid, row, col);
+      if (sonarEl) {
+        var sonarRect = sonarEl.getBoundingClientRect();
+        Particles.sonarPing(sonarRect.left + sonarRect.width / 2, sonarRect.top + sonarRect.height / 2);
+      }
+      // Sonar doesn't fire shots — just reveals info visually
+      for (var i = 0; i < result.cells.length; i++) {
+        var sc = result.cells[i];
+        var scEl = getCell(enemyGrid, sc.row, sc.col);
+        if (scEl) {
+          scEl.classList.add('sonar-revealed');
+          if (sc.hasShip) {
+            scEl.classList.add('sonar-ship');
+          }
+        }
+      }
+      // Fog of War: sonar reveals 5x5 area
+      if (fogState) {
+        FogOfWar.revealArea(fogState, row, col, 2);
+        FogOfWar.applyFog(enemyGrid, fogState);
+        SFX.fogReveal();
+      }
+      addLog('Sonar scan at ' + Engine.formatCoord(row, col) + ' \u2014 area scanned!', '');
+      // Sonar doesn't end the turn — player still fires normally
+      locked = false;
+      return;
+    }
+  }
+
+  function processWeaponCells(cells, endsTurn) {
+    var hitCount = 0;
+    var sunkNames = [];
+    for (var i = 0; i < cells.length; i++) {
+      var c = cells[i];
+      if (c.alreadyFired) continue;
+      var cellEl = getCell(enemyGrid, c.row, c.col);
+      if (!cellEl) continue;
+
+      if (c.result === 'sunk') {
+        cellEl.classList.remove('hit', 'miss');
+        cellEl.classList.add('sunk');
+        var sunkShip = Engine.getShipAt(enemyShips, c.row, c.col);
+        if (sunkShip) {
+          for (var p = 0; p < sunkShip.positions.length; p++) {
+            var sunkCellEl = getCell(enemyGrid, sunkShip.positions[p].row, sunkShip.positions[p].col);
+            if (sunkCellEl) { sunkCellEl.classList.remove('hit', 'miss'); sunkCellEl.classList.add('sunk'); }
+          }
+          if (sunkNames.indexOf(sunkShip.name) === -1) {
+            sunkNames.push(sunkShip.name);
+            SFX.shipSinking();
+            var sRect = cellEl.getBoundingClientRect();
+            Particles.sinking(sRect.left + sRect.width / 2, sRect.top + sRect.height / 2);
+          }
+        }
+        hitCount++;
+        playerHitCount++;
+        playerShotCount++;
+        Stats.scoreHit();
+        if (sunkShip) Stats.scoreSink(sunkShip.positions.length);
+      } else if (c.result === 'hit') {
+        cellEl.classList.add('hit');
+        hitCount++;
+        playerHitCount++;
+        playerShotCount++;
+        Stats.scoreHit();
+      } else if (c.result === 'miss') {
+        cellEl.classList.add('miss');
+        playerShotCount++;
+        Stats.scoreMiss();
+      }
+
+      // Fog of War: reveal around each fired cell
+      if (fogState) {
+        FogOfWar.reveal(fogState, c.row, c.col);
+      }
+    }
+
+    if (fogState) {
+      FogOfWar.applyFog(enemyGrid, fogState);
+      SFX.fogReveal();
+    }
+
+    updateScoreDisplay();
+    updateFleetStatus(enemyFleetList, enemyShips);
+
+    var coordStr = Engine.formatCoord(cells[0].row, cells[0].col);
+    if (sunkNames.length > 0) {
+      setStatus("Weapon strike \u2014 SUNK " + sunkNames.join(', ') + "!", 'sunk');
+      addLog('Weapon strike at ' + coordStr + ' \u2014 SUNK ' + sunkNames.join(', ') + '!', 'sunk');
+    } else if (hitCount > 0) {
+      setStatus("Weapon strike \u2014 " + hitCount + " hit(s)!", 'hit');
+      addLog('Weapon strike at ' + coordStr + ' \u2014 ' + hitCount + ' hit(s)!', 'hit');
+    } else {
+      setStatus("Weapon strike \u2014 all miss!", 'miss');
+      addLog('Weapon strike at ' + coordStr + ' \u2014 all miss', 'miss');
+    }
+
+    if (Engine.isGameOver(enemyShips)) {
+      phase = 'gameover';
+      showGameOver(true);
+      return;
+    }
+
+    if (endsTurn) {
+      setTimeout(function () { doAITurn(); }, 600);
+    }
+  }
+
   // ----- Battle phase -----
   function startBattle() {
     phase = 'battle';
     placementPanel.classList.add('hidden');
     pauseBtn.style.display = '';
+
+    // Clean up drag placement
+    DragPlacement.destroy();
+
+    // Initialize weapons
+    weaponsState = Weapons.create();
+    updateWeaponsPanel();
+    weaponsPanelEl.style.display = '';
+
+    // Initialize Fog of War if applicable
+    if (selectedMode === 'fogofwar') {
+      fogState = FogOfWar.createState(10);
+      FogOfWar.applyFog(enemyGrid, fogState);
+    } else {
+      fogState = null;
+    }
 
     // Determine the effective difficulty for AI
     var effectiveDifficulty = selectedDifficulty;
@@ -771,93 +1066,123 @@
         }
       });
       cell.addEventListener('click', function () {
-        if (phase !== 'battle' || locked) return;
-        if (kbMode && !kbFiring) { kbMode = false; updateCursor(); }
-        var row = parseInt(cell.getAttribute('data-row'), 10);
-        var col = parseInt(cell.getAttribute('data-col'), 10);
-        if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) return;
-
-        // In salvo mode, don't lock until all shots are fired
-        if (selectedMode !== 'salvo') {
-          locked = true;
-        }
-
-        playerShotCount++;
-
-        var shot = Engine.processShot(enemyBoard, enemyShips, row, col);
-        if (shot.alreadyFired) { if (selectedMode !== 'salvo') locked = false; playerShotCount--; return; }
-
-        var coord = Engine.formatCoord(row, col);
-        var _rect;
-
-        if (shot.result === 'sunk') {
-          SFX.sunk();
-          var sunkShip = Engine.getShipAt(enemyShips, row, col);
-          if (sunkShip) {
-            for (var p = 0; p < sunkShip.positions.length; p++) {
-              var sunkCell = getCell(enemyGrid, sunkShip.positions[p].row, sunkShip.positions[p].col);
-              if (sunkCell) { sunkCell.classList.remove('hit', 'miss'); sunkCell.classList.add('sunk'); }
-            }
-          }
-          _rect = cell.getBoundingClientRect();
-          Particles.debris(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-          playerHitCount++;
-          Stats.scoreHit();
-          var sunkShipForScore = Engine.getShipAt(enemyShips, row, col);
-          if (sunkShipForScore) Stats.scoreSink(sunkShipForScore.positions.length);
-          updateScoreDisplay();
-          setStatus("You sunk their " + shot.shipName + "!", 'sunk');
-          addLog('You fired ' + coord + ' \u2014 SUNK ' + shot.shipName + '!', 'sunk');
-        } else if (shot.result === 'hit') {
-          SFX.hit();
-          cell.classList.add('hit');
-          _rect = cell.getBoundingClientRect();
-          Particles.fire(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-          // Add smoke after hit
-          setTimeout(function () {
-            var r2 = cell.getBoundingClientRect();
-            Particles.smoke(r2.left + r2.width / 2, r2.top + r2.height / 2);
-          }, 200);
-          playerHitCount++;
-          Stats.scoreHit();
-          updateScoreDisplay();
-          setStatus("Hit at " + coord + "!", 'hit');
-          addLog('You fired ' + coord + ' \u2014 HIT!', 'hit');
-        } else {
-          SFX.miss();
-          cell.classList.add('miss');
-          _rect = cell.getBoundingClientRect();
-          Particles.splash(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-          Particles.wake(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-          Stats.scoreMiss();
-          updateScoreDisplay();
-          setStatus("Miss at " + coord, 'miss');
-          addLog('You fired ' + coord + ' \u2014 miss', 'miss');
-        }
-
-        updateFleetStatus(enemyFleetList, enemyShips);
-
-        if (Engine.isGameOver(enemyShips)) {
-          phase = 'gameover';
-          showGameOver(true);
-          return;
-        }
-
-        // Salvo mode: decrement shots
-        if (selectedMode === 'salvo') {
-          salvoShotsRemaining--;
-          if (salvoShotsRemaining > 0) {
-            setStatus("Turn " + turnNumber + " \u2014 Shots remaining: " + salvoShotsRemaining);
-            return; // Player still has shots
-          }
-          // All player shots fired, now AI turn
-          locked = true;
-          setTimeout(function () { doAISalvoTurn(); }, 600);
-        } else {
-          setTimeout(function () { doAITurn(); }, 600);
-        }
+        handleEnemyCellClick(cell);
       });
     })(eCells[ei]);
+  }
+
+  // ----- Centralised enemy cell click handler -----
+  function handleEnemyCellClick(cell) {
+    if (phase !== 'battle' || locked) return;
+    if (kbMode && !kbFiring) { kbMode = false; updateCursor(); }
+    var row = parseInt(cell.getAttribute('data-row'), 10);
+    var col = parseInt(cell.getAttribute('data-col'), 10);
+    if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) return;
+
+    // --- Weapon active? ---
+    if (weaponsState && Weapons.isActive(weaponsState)) {
+      locked = true;
+      var activeType = weaponsState.active;
+
+      if (activeType === 'torpedo') {
+        // Torpedo needs direction — show picker
+        pendingWeaponClick = { row: row, col: col };
+        directionPickerEl.style.display = '';
+        return;
+      }
+      // Airstrike and sonar execute immediately
+      executeWeapon(row, col, null);
+      return;
+    }
+
+    // --- Normal shot logic ---
+    // In salvo mode, don't lock until all shots are fired
+    if (selectedMode !== 'salvo') {
+      locked = true;
+    }
+
+    playerShotCount++;
+
+    var shot = Engine.processShot(enemyBoard, enemyShips, row, col);
+    if (shot.alreadyFired) { if (selectedMode !== 'salvo') locked = false; playerShotCount--; return; }
+
+    var coord = Engine.formatCoord(row, col);
+    var _rect;
+
+    if (shot.result === 'sunk') {
+      SFX.sunk();
+      var sunkShip = Engine.getShipAt(enemyShips, row, col);
+      if (sunkShip) {
+        for (var p = 0; p < sunkShip.positions.length; p++) {
+          var sunkCell = getCell(enemyGrid, sunkShip.positions[p].row, sunkShip.positions[p].col);
+          if (sunkCell) { sunkCell.classList.remove('hit', 'miss'); sunkCell.classList.add('sunk'); }
+        }
+        SFX.shipSinking();
+        _rect = cell.getBoundingClientRect();
+        Particles.sinking(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      }
+      _rect = cell.getBoundingClientRect();
+      Particles.debris(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      playerHitCount++;
+      Stats.scoreHit();
+      var sunkShipForScore = Engine.getShipAt(enemyShips, row, col);
+      if (sunkShipForScore) Stats.scoreSink(sunkShipForScore.positions.length);
+      updateScoreDisplay();
+      setStatus("You sunk their " + shot.shipName + "!", 'sunk');
+      addLog('You fired ' + coord + ' \u2014 SUNK ' + shot.shipName + '!', 'sunk');
+    } else if (shot.result === 'hit') {
+      SFX.hit();
+      cell.classList.add('hit');
+      _rect = cell.getBoundingClientRect();
+      Particles.fire(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      setTimeout(function () {
+        var r2 = cell.getBoundingClientRect();
+        Particles.smoke(r2.left + r2.width / 2, r2.top + r2.height / 2);
+      }, 200);
+      playerHitCount++;
+      Stats.scoreHit();
+      updateScoreDisplay();
+      setStatus("Hit at " + coord + "!", 'hit');
+      addLog('You fired ' + coord + ' \u2014 HIT!', 'hit');
+    } else {
+      SFX.miss();
+      cell.classList.add('miss');
+      _rect = cell.getBoundingClientRect();
+      Particles.splash(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      Particles.wake(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
+      Stats.scoreMiss();
+      updateScoreDisplay();
+      setStatus("Miss at " + coord, 'miss');
+      addLog('You fired ' + coord + ' \u2014 miss', 'miss');
+    }
+
+    // Fog of War: reveal around the fired cell
+    if (fogState) {
+      FogOfWar.reveal(fogState, row, col);
+      FogOfWar.applyFog(enemyGrid, fogState);
+      SFX.fogReveal();
+    }
+
+    updateFleetStatus(enemyFleetList, enemyShips);
+
+    if (Engine.isGameOver(enemyShips)) {
+      phase = 'gameover';
+      showGameOver(true);
+      return;
+    }
+
+    // Salvo mode: decrement shots
+    if (selectedMode === 'salvo') {
+      salvoShotsRemaining--;
+      if (salvoShotsRemaining > 0) {
+        setStatus("Turn " + turnNumber + " \u2014 Shots remaining: " + salvoShotsRemaining);
+        return;
+      }
+      locked = true;
+      setTimeout(function () { doAISalvoTurn(); }, 600);
+    } else {
+      setTimeout(function () { doAITurn(); }, 600);
+    }
   }
 
   // ----- AI turn (single shot) -----
@@ -990,6 +1315,13 @@
   function showGameOver(playerWon) {
     locked = true;
     pauseBtn.style.display = 'none';
+    hideWeaponsPanel();
+
+    // Fog of War: reveal all on game over
+    if (fogState) {
+      FogOfWar.revealAll(fogState);
+      FogOfWar.applyFog(enemyGrid, fogState);
+    }
 
     // Stop ambient audio
     SFX.stopAmbient();
@@ -1110,7 +1442,9 @@
     // Reset placement
     phase = 'placement';
     placementPanel.classList.remove('hidden');
+    hideWeaponsPanel();
     resetPlacement();
+    initDragPlacement();
     setStatus('Round ' + round.round + ': ' + round.title + ' \u2014 Place your ships!');
   }
 
@@ -1249,6 +1583,10 @@
     kbMode = false;
     kbRow = 0;
     kbCol = 0;
+    weaponsState = null;
+    fogState = null;
+    pendingWeaponClick = null;
+    hideWeaponsPanel();
 
     // Clear grids
     buildGrid(playerGrid);
@@ -1356,87 +1694,7 @@
           }
         });
         cell.addEventListener('click', function () {
-          if (phase !== 'battle' || locked) return;
-          if (kbMode && !kbFiring) { kbMode = false; updateCursor(); }
-          var row = parseInt(cell.getAttribute('data-row'), 10);
-          var col = parseInt(cell.getAttribute('data-col'), 10);
-          if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) return;
-
-          if (selectedMode !== 'salvo') {
-            locked = true;
-          }
-
-          playerShotCount++;
-
-          var shot = Engine.processShot(enemyBoard, enemyShips, row, col);
-          if (shot.alreadyFired) { if (selectedMode !== 'salvo') locked = false; playerShotCount--; return; }
-
-          var coord = Engine.formatCoord(row, col);
-          var _rect;
-
-          if (shot.result === 'sunk') {
-            SFX.sunk();
-            var sunkShip = Engine.getShipAt(enemyShips, row, col);
-            if (sunkShip) {
-              for (var p = 0; p < sunkShip.positions.length; p++) {
-                var sunkCell = getCell(enemyGrid, sunkShip.positions[p].row, sunkShip.positions[p].col);
-                if (sunkCell) { sunkCell.classList.remove('hit', 'miss'); sunkCell.classList.add('sunk'); }
-              }
-            }
-            _rect = cell.getBoundingClientRect();
-            Particles.debris(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-            playerHitCount++;
-            Stats.scoreHit();
-            var sunkShipForScore = Engine.getShipAt(enemyShips, row, col);
-            if (sunkShipForScore) Stats.scoreSink(sunkShipForScore.positions.length);
-            updateScoreDisplay();
-            setStatus("You sunk their " + shot.shipName + "!", 'sunk');
-            addLog('You fired ' + coord + ' \u2014 SUNK ' + shot.shipName + '!', 'sunk');
-          } else if (shot.result === 'hit') {
-            SFX.hit();
-            cell.classList.add('hit');
-            _rect = cell.getBoundingClientRect();
-            Particles.fire(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-            setTimeout(function () {
-              var r2 = cell.getBoundingClientRect();
-              Particles.smoke(r2.left + r2.width / 2, r2.top + r2.height / 2);
-            }, 200);
-            playerHitCount++;
-            Stats.scoreHit();
-            updateScoreDisplay();
-            setStatus("Hit at " + coord + "!", 'hit');
-            addLog('You fired ' + coord + ' \u2014 HIT!', 'hit');
-          } else {
-            SFX.miss();
-            cell.classList.add('miss');
-            _rect = cell.getBoundingClientRect();
-            Particles.splash(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-            Particles.wake(_rect.left + _rect.width / 2, _rect.top + _rect.height / 2);
-            Stats.scoreMiss();
-            updateScoreDisplay();
-            setStatus("Miss at " + coord, 'miss');
-            addLog('You fired ' + coord + ' \u2014 miss', 'miss');
-          }
-
-          updateFleetStatus(enemyFleetList, enemyShips);
-
-          if (Engine.isGameOver(enemyShips)) {
-            phase = 'gameover';
-            showGameOver(true);
-            return;
-          }
-
-          if (selectedMode === 'salvo') {
-            salvoShotsRemaining--;
-            if (salvoShotsRemaining > 0) {
-              setStatus("Turn " + turnNumber + " \u2014 Shots remaining: " + salvoShotsRemaining);
-              return;
-            }
-            locked = true;
-            setTimeout(function () { doAISalvoTurn(); }, 600);
-          } else {
-            setTimeout(function () { doAITurn(); }, 600);
-          }
+          handleEnemyCellClick(cell);
         });
       })(cells[i]);
     }

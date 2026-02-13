@@ -6,6 +6,11 @@
   <title>Battleships</title>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/accessibility.css">
+  <link rel="stylesheet" href="styles/animations.css">
+  <link rel="stylesheet" href="styles/weapons.css">
+  <link rel="stylesheet" href="styles/drag-placement.css">
+  <link rel="stylesheet" href="styles/fog-of-war.css">
+  <link rel="stylesheet" href="styles/mobile.css">
 </head>
 <body>
 
@@ -60,6 +65,16 @@
         <div style="font-size:2rem;margin-bottom:0.5rem;">&#127775;</div>
         <div style="font-size:1rem;font-weight:700;margin-bottom:0.3rem;">Campaign</div>
         <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.4;">Five battles of escalating difficulty.</div>
+      </button>
+      <button class="mode-card" data-mode="fogofwar" aria-label="Fog of War mode" style="
+        flex:1;min-width:160px;max-width:200px;padding:1.2rem 1rem;cursor:pointer;
+        background:rgba(30,58,95,0.6);border:2px solid var(--glass-border);
+        border-radius:8px;color:var(--text-primary);font-family:inherit;
+        transition:all 0.3s ease;text-align:center;position:relative;overflow:hidden;
+      ">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">&#127787;&#65039;</div>
+        <div style="font-size:1rem;font-weight:700;margin-bottom:0.3rem;">Fog of War</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.4;">Enemy waters shrouded in fog. Fire to reveal.</div>
       </button>
     </div>
 
@@ -214,6 +229,18 @@
     <div id="live-score" class="live-score" style="display:none;">Score: <span id="score-value">0</span></div>
   </div>
 
+  <!-- Weapons Panel -->
+  <div id="weapons-panel" class="weapons-panel" style="display:none;">
+    <button class="weapon-btn" data-weapon="torpedo" aria-label="Torpedo, 2 uses"><span class="weapon-icon">&#128165;</span><span class="weapon-name">Torpedo</span><span class="weapon-uses">2</span></button>
+    <button class="weapon-btn" data-weapon="airstrike" aria-label="Airstrike, 1 use"><span class="weapon-icon">&#9992;&#65039;</span><span class="weapon-name">Airstrike</span><span class="weapon-uses">1</span></button>
+    <button class="weapon-btn" data-weapon="sonar" aria-label="Sonar, 2 uses"><span class="weapon-icon">&#128225;</span><span class="weapon-name">Sonar</span><span class="weapon-uses">2</span></button>
+  </div>
+  <div id="direction-picker" class="direction-picker" style="display:none;">
+    <button class="direction-btn" data-direction="horizontal">&#8596; Horizontal</button>
+    <button class="direction-btn" data-direction="vertical">&#8597; Vertical</button>
+    <button class="direction-btn cancel" data-direction="cancel">&#10005; Cancel</button>
+  </div>
+
   <!-- Ship Placement Panel -->
   <div id="placement-panel" class="hidden">
     <h3>Deploy Your Fleet</h3>
@@ -317,6 +344,9 @@
 <script src="js/particles.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/modes.js"></script>
+<script src="js/weapons.js"></script>
+<script src="js/drag-placement.js"></script>
+<script src="js/fog-of-war.js"></script>
 <script src="js/achievements.js"></script>
 <script src="js/tutorial.js"></script>
 <script src="js/game.js"></script>

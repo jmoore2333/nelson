@@ -113,6 +113,36 @@ select:focus-visible,
   background-size: auto;
 }
 
+/* Sonar-revealed cells (empty): concentric ring pattern */
+.colorblind-mode .cell.sonar-revealed::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 14px; height: 14px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(46, 204, 113, 0.7);
+  background: transparent;
+  box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.2);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Sonar-ship cells (ship detected): diamond marker */
+.colorblind-mode .cell.sonar-ship::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 14px; height: 14px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 0;
+  border: none;
+  background: rgba(46, 204, 113, 0.8);
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+  z-index: 3;
+  pointer-events: none;
+}
+
 /* Ship cells: horizontal stripe pattern */
 .colorblind-mode .cell.ship {
   background-image:
@@ -315,5 +345,68 @@ select:focus-visible,
   /* Disable particle canvas rendering in reduced motion */
   #particle-canvas {
     display: none !important;
+  }
+}
+
+
+/* ============================================================
+   TOUCH-SPECIFIC FOCUS STYLES — Larger focus rings on touch
+   ============================================================ */
+
+@media (pointer: coarse) {
+  *:focus-visible {
+    outline-width: 4px;
+    outline-offset: 4px;
+  }
+
+  .cell:focus-visible {
+    outline-offset: -4px;
+  }
+}
+
+
+/* ============================================================
+   SAFE AREA INSETS — Settings panel on notched devices
+   ============================================================ */
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 768px) {
+    #settings-panel {
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+      padding-left: calc(1.4rem + env(safe-area-inset-left));
+      padding-right: calc(1.4rem + env(safe-area-inset-right));
+    }
+  }
+}
+
+
+/* ============================================================
+   TOUCH TARGET SIZE — Accessibility toggles on touch devices
+   ============================================================ */
+
+@media (pointer: coarse) {
+  #settings-panel input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    min-width: 44px;
+    min-height: 44px;
+    cursor: pointer;
+  }
+
+  #settings-panel select {
+    min-height: 44px;
+    padding: 0.5rem 2rem 0.5rem 0.8rem;
+    font-size: 1rem;
+  }
+
+  #settings-panel input[type="range"] {
+    min-height: 44px;
+    cursor: pointer;
+  }
+
+  /* Ensure adequate spacing between toggle rows */
+  #settings-panel > div[style*="display:flex"] {
+    min-height: 44px;
+    gap: 1rem;
   }
 }
