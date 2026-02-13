@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SKILL_DIR=".claude/skills/nelson"
+SKILL_DIR="skills/nelson"
 REF_DIR="$SKILL_DIR/references"
 errors=0
 

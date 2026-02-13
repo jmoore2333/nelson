@@ -5,20 +5,23 @@ Nelson is a Claude Code skill for coordinating agent work using Royal Navy termi
 ## Project structure
 
 ```
-.claude/skills/nelson/
-  SKILL.md              — Main entrypoint (what Claude reads)
-  references/           — Supporting docs loaded on demand
-    action-stations.md    — Risk tier definitions (Station 0–3)
-    admiralty-templates.md — Index routing to individual template files
-    admiralty-templates/   — One file per template, loaded on demand
-    crew-roles.md         — Crew role definitions, ship names & sizing rules
-    damage-control.md     — Index routing to individual procedure files
-    damage-control/       — One file per procedure, loaded on demand
+.claude-plugin/
+  plugin.json             — Plugin manifest
+  marketplace.json        — Marketplace definition (self-hosted)
+skills/nelson/
+  SKILL.md                — Main entrypoint (what Claude reads)
+  references/             — Supporting docs loaded on demand
+    action-stations.md      — Risk tier definitions (Station 0–3)
+    admiralty-templates.md   — Index routing to individual template files
+    admiralty-templates/     — One file per template, loaded on demand
+    crew-roles.md           — Crew role definitions, ship names & sizing rules
+    damage-control.md       — Index routing to individual procedure files
+    damage-control/         — One file per procedure, loaded on demand
     squadron-composition.md — Mode selection & team sizing rules
-    standing-orders.md    — Index routing to individual anti-pattern files
-    standing-orders/      — One file per anti-pattern, loaded on demand
-  agents/               — Agent interface definitions
-demos/                  — Example applications built with Nelson
+    standing-orders.md      — Index routing to individual anti-pattern files
+    standing-orders/        — One file per anti-pattern, loaded on demand
+agents/                   — Agent interface definitions
+demos/                    — Example applications built with Nelson
 ```
 
 ## No build system
@@ -27,12 +30,20 @@ This is a documentation-driven skill with zero runtime dependencies. There is no
 
 ## Testing changes
 
-Install the skill locally and run a mission to verify. Either tell Claude Code "Install skills from https://github.com/harrymunro/nelson" or copy the skill directory manually:
+Install the plugin and run a mission to verify:
 
-```bash
-mkdir -p <target-project>/.claude/skills
-cp -r .claude/skills/nelson <target-project>/.claude/skills/nelson
 ```
+/plugin install harrymunro/nelson
+```
+
+Or add the marketplace first, then install:
+
+```
+/plugin marketplace add harrymunro/nelson
+/plugin install nelson
+```
+
+For local development in this repo, the symlink at `.claude/skills/nelson` → `../../skills/nelson` means `/nelson` works automatically.
 
 Then invoke `/nelson` in Claude Code.
 
