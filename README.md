@@ -1,7 +1,7 @@
 # Nelson
 
 <p align="center">
-  <img src="1024px-Young_Nelson-min.jpg" alt="Captain Horatio Nelson" width="500">
+  <img src="docs/images/1024px-Young_Nelson-min.jpg" alt="Captain Horatio Nelson" width="500">
   <br>
   <em>Captain Horatio Nelson — John Francis Rigaud, 1781. Image: Wikimedia Commons</em>
 </p>
@@ -38,7 +38,20 @@ Nelson gives Claude a six-step operational framework for tackling complex missio
 
 ## Installation
 
-### Prompt-based (recommended)
+### Plugin install (recommended)
+
+```
+/plugin install harrymunro/nelson
+```
+
+Or add the marketplace first, then install by name:
+
+```
+/plugin marketplace add harrymunro/nelson
+/plugin install nelson
+```
+
+### Prompt-based
 
 Open Claude Code and say:
 
@@ -56,11 +69,11 @@ Clone the repo and copy the skill directory yourself:
 # Project-level (recommended for teams)
 git clone https://github.com/harrymunro/nelson.git /tmp/nelson
 mkdir -p .claude/skills
-cp -r /tmp/nelson/.claude/skills/nelson .claude/skills/nelson
+cp -r /tmp/nelson/skills/nelson .claude/skills/nelson
 rm -rf /tmp/nelson
 
 # Or user-level (personal, all projects)
-cp -r /tmp/nelson/.claude/skills/nelson ~/.claude/skills/nelson
+cp -r /tmp/nelson/skills/nelson ~/.claude/skills/nelson
 ```
 
 Then commit `.claude/skills/nelson/` to version control so your team can use it.
@@ -122,7 +135,7 @@ Scope:
 ## How it works
 
 <p align="center">
-  <img src="HMP_RNM_1973_76-001.jpg" alt="HMS Victory anchored off the Isle of Wight" width="700">
+  <img src="docs/images/HMP_RNM_1973_76-001.jpg" alt="HMS Victory anchored off the Isle of Wight" width="700">
   <br>
   <em>HMS Victory anchored off the Isle of Wight — John Wilson Carmichael (1799–1868), National Museum of the Royal Navy, Portsmouth</em>
 </p>
@@ -218,13 +231,14 @@ The skill includes structured templates for consistent output across missions:
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/5955341c-a251-4e05-b0ed-61f424181201" />
 
-## Skill file structure
+## Plugin file structure
 
 ```
-.claude/skills/nelson/
+.claude-plugin/
+├── plugin.json                               # Plugin manifest
+└── marketplace.json                          # Marketplace definition (self-hosted)
+skills/nelson/
 ├── SKILL.md                                  # Main skill instructions (entrypoint)
-├── agents/
-│   └── openai.yaml                           # OpenAI agent interface definition
 └── references/
     ├── action-stations.md                    # Risk tier definitions and controls
     ├── admiralty-templates.md                # Template routing index
@@ -258,8 +272,12 @@ The skill includes structured templates for consistent output across missions:
         ├── skeleton-crew.md
         ├── split-keel.md
         └── unclassified-engagement.md
+agents/
+└── openai.yaml                              # OpenAI agent interface definition
 ```
 
+- `plugin.json` declares the plugin name, version, and component paths for Claude Code's plugin system.
+- `marketplace.json` lets users add this repo as a plugin marketplace and install Nelson by name.
 - `SKILL.md` is the entrypoint that Claude reads when the skill is invoked. It defines the six-step workflow and references the supporting files.
 - Files in `references/` contain detailed guidance that Claude loads on demand — they are not all loaded into context at once.
 
